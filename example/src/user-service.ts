@@ -1,10 +1,10 @@
-import type { User } from './types'
+import type { User, CreateUserResult } from './types'
 
 export async function getUser(id: string): Promise<User> {
   throw new Error('real implementation — hits database')
 }
 
-export async function createUser(name: string, age: number): Promise<{ id: string }> {
+export async function createUser(name: string, age: number): Promise<CreateUserResult> {
   throw new Error('real implementation — hits database')
 }
 
