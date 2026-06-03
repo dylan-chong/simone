@@ -23,9 +23,14 @@ export interface EmailPreferences {
   notifications: boolean
 }
 
+export enum Channel {
+  Web = 'web',
+  Mobile = 'mobile',
+}
+
 export interface EmailQuery {
   userId: string
-  channel: 'web' | 'mobile'
+  channel: Channel
 }
 
 export interface SendEmailRequest {
