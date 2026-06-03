@@ -6,7 +6,7 @@ const userService = mockModule<typeof import('./user-service')>('./user-service'
 const emailService = mockModule<typeof import('./email-service')>('./email-service')
 
 describe('loadProfile', () => {
-  it('returns enriched user data with email preferences', async () => {
+  it('includes user name and email preferences in the profile', async () => {
     userService.expects('getUser').withArgs('user-1').returns(
       Promise.resolve({ id: 'user-1', name: 'Alice' })
     )
@@ -21,7 +21,7 @@ describe('loadProfile', () => {
     expect(profile.loadedAt).toBeTypeOf('number')
   })
 
-  it('uses .calls() for dynamic return values', async () => {
+  it('derives user name from the user id', async () => {
     userService.expects('getUser').withArgs('user-1').calls(
       async (id) => ({ id, name: `User-${id}` })
     )
@@ -35,7 +35,7 @@ describe('loadProfile', () => {
     expect(profile.emailPrefs).toEqual({ marketing: false, notifications: true })
   })
 
-  it('uses .resolves() as shorthand for Promise.resolve', async () => {
+  it('loads profile with marketing opted in', async () => {
     userService.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
     emailService.expects('getEmailPreferences').withArgs('user-1').resolves({ marketing: true, notifications: false })
 
@@ -45,19 +45,19 @@ describe('loadProfile', () => {
     expect(profile.emailPrefs).toEqual({ marketing: true, notifications: false })
   })
 
-  it('uses .throws() to simulate a sync error', async () => {
+  it('fails when the database is offline', async () => {
     userService.expects('getUser').withArgs('user-1').throws(new Error('db offline'))
 
     await expect(loadProfile('user-1')).rejects.toThrow('db offline')
   })
 
-  it('uses .rejects() to simulate a rejected promise', async () => {
+  it('fails when the user service times out', async () => {
     userService.expects('getUser').withArgs('user-1').rejects(new Error('timeout'))
 
     await expect(loadProfile('user-1')).rejects.toThrow('timeout')
   })
 
-  it('loads multiple users in order', async () => {
+  it('loads profiles for multiple users sequentially', async () => {
     userService.expects('getUser').withArgs('user-1').returns(
       Promise.resolve({ id: 'user-1', name: 'Alice' })
     )
