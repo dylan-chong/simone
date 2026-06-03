@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "vitest --typecheck --run && vitest --typecheck --run --config example/vitest.config.ts",
+    "test": "tsc --noEmit && tsc --noEmit -p example/tsconfig.json && vitest --typecheck --run && vitest --typecheck --run --config example/vitest.config.ts",
     "test:example": "vitest run --config example/vitest.config.ts",
     "test:watch": "vitest"
   },
