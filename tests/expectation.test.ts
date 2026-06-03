@@ -259,4 +259,65 @@ describe('globalQueue', () => {
       '+ arg 1: ' + JSON.stringify(userWithDifferentAddress, null, 2)
     )
   })
+
+  it('matches multiple complex args mixed with primitives', () => {
+    globalQueue.add({
+      fnName: 'mod.processOrder',
+      args: ['shop-1', orderWithItems, true, userWithAddress, 42],
+      response: { type: ResponseType.return, value: 'done' },
+    })
+
+    expect(globalQueue.consume('mod.processOrder', ['shop-1', orderWithItems, true, userWithAddress, 42])).toBe('done')
+  })
+
+  it('rejects when one complex arg differs among many', () => {
+    globalQueue.add({
+      fnName: 'mod.processOrder',
+      args: ['shop-1', orderWithItems, true, userWithAddress, 42],
+      response: { type: ResponseType.return, value: 'done' },
+    })
+
+    expect(() => globalQueue.consume('mod.processOrder', ['shop-1', orderWithDifferentItems, true, userWithAddress, 42])).toThrow(
+      'mod.processOrder() was called with wrong arguments\n\n' +
+      '  arg 0: "shop-1"\n' +
+      '- arg 1: ' + JSON.stringify(orderWithItems, null, 2) + '\n' +
+      '+ arg 1: ' + JSON.stringify(orderWithDifferentItems, null, 2) + '\n' +
+      '  arg 2: true\n' +
+      '  arg 3: ' + JSON.stringify(userWithAddress, null, 2) + '\n' +
+      '  arg 4: 42'
+    )
+  })
+
+  it('rejects when a primitive arg differs among complex args', () => {
+    globalQueue.add({
+      fnName: 'mod.sync',
+      args: [nestedConfig, 'production', 3, userWithAddress],
+      response: { type: ResponseType.return, value: 'ok' },
+    })
+
+    expect(() => globalQueue.consume('mod.sync', [nestedConfig, 'staging', 3, userWithAddress])).toThrow(
+      'mod.sync() was called with wrong arguments\n\n' +
+      '  arg 0: ' + JSON.stringify(nestedConfig, null, 2) + '\n' +
+      '- arg 1: "production"\n' +
+      '+ arg 1: "staging"\n' +
+      '  arg 2: 3\n' +
+      '  arg 3: ' + JSON.stringify(userWithAddress, null, 2)
+    )
+  })
+
+  it('rejects when last arg differs in a multi-arg call', () => {
+    globalQueue.add({
+      fnName: 'mod.save',
+      args: ['tenant-1', true, nestedConfig],
+      response: { type: ResponseType.return, value: 'saved' },
+    })
+
+    expect(() => globalQueue.consume('mod.save', ['tenant-1', true, nestedConfigWithChanges])).toThrow(
+      'mod.save() was called with wrong arguments\n\n' +
+      '  arg 0: "tenant-1"\n' +
+      '  arg 1: true\n' +
+      '- arg 2: ' + JSON.stringify(nestedConfig, null, 2) + '\n' +
+      '+ arg 2: ' + JSON.stringify(nestedConfigWithChanges, null, 2)
+    )
+  })
 })
