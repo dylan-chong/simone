@@ -7,5 +7,8 @@ export default defineConfig({
     root: './example',
     include: ['src/**/*.test.ts'],
     globals: true,
+    typecheck: {
+      tsconfig: './example/tsconfig.json',
+    },
   },
 })

@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "vitest run && vitest --typecheck --run && vitest run --config example/vitest.config.ts",
+    "test": "vitest run && vitest --typecheck --run && vitest run --config example/vitest.config.ts && vitest --typecheck --run --config example/vitest.config.ts",
     "test:example": "vitest run --config example/vitest.config.ts",
     "test:watch": "vitest"
   },
