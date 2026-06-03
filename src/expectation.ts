@@ -92,7 +92,7 @@ function formatArgs(args: unknown[]): string {
 function formatArgsDiff(expected: unknown[], actual: unknown[]): string {
   const lines: string[] = []
   const maxLen = Math.max(expected.length, actual.length)
-  for (let i = 0; i < maxLen; i++) {
+  for (const i of Array.from({ length: maxLen }, (_, idx) => idx)) {
     const exp = i < expected.length ? stableStringify(expected[i]) : undefined
     const act = i < actual.length ? stableStringify(actual[i]) : undefined
     if (exp === act) {
