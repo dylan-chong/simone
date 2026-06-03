@@ -23,7 +23,7 @@ export function simonePlugin(): Plugin {
       if (!code.includes('mockModule')) return null
       if (id.includes('node_modules')) return null
 
-      const mockModuleRegex = /const\s+(\w+)\s*=\s*mockModule\s*<[^>]*>\s*\(\s*['"]([^'"]+)['"]\s*\)/g
+      const mockModuleRegex = /const\s+(\w+)\s*=\s*mockModule\s*<[^>]*(?:<[^>]*>[^>]*)*>\s*\(\s*['"]([^'"]+)['"]\s*\)/g
       const mocks = [...code.matchAll(mockModuleRegex)].map((match) => ({ varName: match[1], path: match[2] }))
 
       if (mocks.length === 0) return null
