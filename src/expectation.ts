@@ -1,4 +1,4 @@
-export enum responseType {
+export enum ResponseType {
   return = 'return',
   throw = 'throw',
   reject = 'reject',
@@ -6,10 +6,10 @@ export enum responseType {
 }
 
 type Response =
-  | { type: responseType.return; value: unknown }
-  | { type: responseType.throw; error: unknown }
-  | { type: responseType.reject; error: unknown }
-  | { type: responseType.callback; fn: (...args: any[]) => unknown }
+  | { type: ResponseType.return; value: unknown }
+  | { type: ResponseType.throw; error: unknown }
+  | { type: ResponseType.reject; error: unknown }
+  | { type: ResponseType.callback; fn: (...args: any[]) => unknown }
 
 interface QueuedExpectation {
   fnName: string
@@ -46,13 +46,13 @@ class GlobalExpectationQueue {
     }
 
     this.consumedCount++
-    if (next.response.type === responseType.throw) {
+    if (next.response.type === ResponseType.throw) {
       throw next.response.error
     }
-    if (next.response.type === responseType.reject) {
+    if (next.response.type === ResponseType.reject) {
       return Promise.reject(next.response.error)
     }
-    if (next.response.type === responseType.callback) {
+    if (next.response.type === ResponseType.callback) {
       return next.response.fn(...calledArgs)
     }
     return next.response.value

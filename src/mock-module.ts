@@ -1,4 +1,4 @@
-import { globalQueue, responseType } from './expectation'
+import { globalQueue, ResponseType } from './expectation'
 import { registry, type Resettable } from './registry'
 import type { MockModuleInstance, ExpectationWithArgs } from './types'
 
@@ -19,19 +19,19 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
           const fnName = `${moduleName}.${name}`
           return {
             returns(value: unknown): void {
-              globalQueue.add({ fnName, args, response: { type: responseType.return, value } })
+              globalQueue.add({ fnName, args, response: { type: ResponseType.return, value } })
             },
             throws(error: unknown): void {
-              globalQueue.add({ fnName, args, response: { type: responseType.throw, error } })
+              globalQueue.add({ fnName, args, response: { type: ResponseType.throw, error } })
             },
             resolves(value: unknown): void {
-              globalQueue.add({ fnName, args, response: { type: responseType.return, value: Promise.resolve(value) } })
+              globalQueue.add({ fnName, args, response: { type: ResponseType.return, value: Promise.resolve(value) } })
             },
             rejects(error: unknown): void {
-              globalQueue.add({ fnName, args, response: { type: responseType.reject, error } })
+              globalQueue.add({ fnName, args, response: { type: ResponseType.reject, error } })
             },
             calls(fn: (...a: any[]) => unknown): void {
-              globalQueue.add({ fnName, args, response: { type: responseType.callback, fn } })
+              globalQueue.add({ fnName, args, response: { type: ResponseType.callback, fn } })
             },
           }
         },
