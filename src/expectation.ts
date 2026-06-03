@@ -3,6 +3,7 @@ interface QueuedExpectation {
   args: unknown[]
   returnValue: unknown
   shouldThrow?: boolean
+  shouldReject?: boolean
   callback?: (...args: any[]) => unknown
 }
 
@@ -31,6 +32,9 @@ class GlobalExpectationQueue {
     this.cursor++
     if (next.shouldThrow) {
       throw next.returnValue
+    }
+    if (next.shouldReject) {
+      return Promise.reject(next.returnValue)
     }
     if (next.callback) {
       return next.callback(...calledArgs)

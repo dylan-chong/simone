@@ -80,4 +80,24 @@ describe('globalQueue', () => {
 
     expect(globalQueue.getUnconsumed()).toHaveLength(0)
   })
+
+  it('throws the returnValue when shouldThrow is set', () => {
+    globalQueue.add({ fnId: 'mod.getUser', args: ['user-1'], returnValue: new Error('fail'), shouldThrow: true })
+
+    expect(() => globalQueue.consume('mod.getUser', ['user-1'])).toThrow('fail')
+  })
+
+  it('invokes callback and returns its result', () => {
+    globalQueue.add({ fnId: 'mod.add', args: [1, 2], returnValue: undefined, callback: (a: number, b: number) => a + b })
+
+    expect(globalQueue.consume('mod.add', [1, 2])).toBe(3)
+  })
+
+  it('callback receives the called args', () => {
+    const received: unknown[] = []
+    globalQueue.add({ fnId: 'mod.fn', args: ['x'], returnValue: undefined, callback: (...args) => { received.push(...args); return 'ok' } })
+
+    globalQueue.consume('mod.fn', ['x'])
+    expect(received).toEqual(['x'])
+  })
 })

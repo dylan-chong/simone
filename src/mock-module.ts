@@ -28,7 +28,7 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
               globalQueue.add({ fnId, args, returnValue: Promise.resolve(value) })
             },
             rejects(error: unknown): void {
-              globalQueue.add({ fnId, args, returnValue: Promise.reject(error) })
+              globalQueue.add({ fnId, args, returnValue: error, shouldReject: true })
             },
             calls(fn: (...a: any[]) => unknown): void {
               globalQueue.add({ fnId, args, returnValue: undefined, callback: fn })

@@ -97,6 +97,8 @@ Invokes `fn` with the matched args to compute the return value. `fn` must match 
 4. Add runtime tests to `tests/mock-module.test.ts`
 5. Add a passing example test to `example/src/profile-loader.test.ts`
 6. Add an expected-failure test to `example/src/profile-loader.failures.test.ts`
-7. Document in the API section of this README
+7. Document in the API section above
 8. Run `npm test` to verify all tests, type checks, and examples pass
+
+Example project test names must describe expected behaviour from the perspective of the example project's domain (e.g. "fails when the database is offline"), not the simone API being used (e.g. "uses .throws() to simulate an error").
 
