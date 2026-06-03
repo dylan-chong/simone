@@ -43,3 +43,8 @@ export interface SendEmailResult {
   sent: boolean
   messageId: string
 }
+
+export interface Profile extends User {
+  emailPrefs: EmailPreferences
+  loadedAt: number
+}
