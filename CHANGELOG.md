@@ -3,6 +3,19 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-03
+### Added
+- Integration tests for mixing `.returns()`, `.throws()`, `.calls()`, `.resolves()`, `.rejects()` across modules
+- Comprehensive `deepEqual` edge case tests (nested objects, arrays, null, primitives, extra/missing keys)
+- Exact error message assertions in all tests
+
+### Changed
+- `QueuedExpectation` uses a discriminated union `Response` type instead of flat boolean flags
+- `responseType` enum for response variants
+- Renamed `fnId` → `fnName`, `cursor` → `consumedCount`
+- `.rejects()` only available on Promise-returning functions (compile error otherwise)
+- Rejected promises created lazily in `consume()` to avoid unhandled rejections
+
 ## [1.2.0] - 2026-06-03
 ### Added
 - `.expects(name).withArgs(...).throws(error)` — stub throws synchronously
