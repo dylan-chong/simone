@@ -20,6 +20,7 @@ interface QueuedExpectation {
 class GlobalExpectationQueue {
   private queue: QueuedExpectation[] = []
   private consumedCount = 0
+  private hadArgMismatch = false
 
   add(expectation: QueuedExpectation): void {
     this.queue.push(expectation)
@@ -39,6 +40,7 @@ class GlobalExpectationQueue {
       )
     }
     if (!deepEqual(next.args, calledArgs)) {
+      this.hadArgMismatch = true
       throw new Error(
         `${fnName}() was called with wrong arguments\n\n` +
         formatArgsDiff(next.args, calledArgs)
@@ -62,9 +64,14 @@ class GlobalExpectationQueue {
     return this.queue.slice(this.consumedCount)
   }
 
+  hasArgMismatch(): boolean {
+    return this.hadArgMismatch
+  }
+
   reset(): void {
     this.queue = []
     this.consumedCount = 0
+    this.hadArgMismatch = false
   }
 }
 

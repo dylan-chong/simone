@@ -16,6 +16,9 @@ class Registry {
   }
 
   verifyAll(): void {
+    if (globalQueue.hasArgMismatch()) {
+      throw new Error('simone: expectation was called with incorrect args. Search for previous error.')
+    }
     const unconsumed = globalQueue.getUnconsumed()
     if (unconsumed.length > 0) {
       const details = unconsumed
