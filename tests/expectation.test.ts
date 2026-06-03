@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { globalQueue } from '../src/expectation'
+import { globalQueue, responseType } from '../src/expectation'
 
 describe('globalQueue', () => {
   beforeEach(() => {
@@ -7,15 +7,15 @@ describe('globalQueue', () => {
   })
 
   it('matches the next expectation when fn and args match', () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'Alice' } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.return, value: 'Alice' } })
 
     const result = globalQueue.consume('mod.getUser', ['user-1'])
     expect(result).toBe('Alice')
   })
 
   it('enforces ordering — throws if wrong fn is called', () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'Alice' } })
-    globalQueue.add({ fnName: 'mod.sendEmail', args: ['user-1'], response: { type: 'return', value: undefined } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.return, value: 'Alice' } })
+    globalQueue.add({ fnName: 'mod.sendEmail', args: ['user-1'], response: { type: responseType.return, value: undefined } })
 
     expect(() => globalQueue.consume('mod.sendEmail', ['user-1'])).toThrow(
       'expected mod.getUser("user-1") to be called next, but mod.sendEmail("user-1") was called'
@@ -23,7 +23,7 @@ describe('globalQueue', () => {
   })
 
   it('enforces ordering — throws if right fn but wrong args', () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'Alice' } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.return, value: 'Alice' } })
 
     expect(() => globalQueue.consume('mod.getUser', ['user-2'])).toThrow(
       'mod.getUser() was called with wrong arguments\n\n' +
@@ -33,8 +33,8 @@ describe('globalQueue', () => {
   })
 
   it('consumes expectations sequentially', () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'first' } })
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'second' } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.return, value: 'first' } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.return, value: 'second' } })
 
     expect(globalQueue.consume('mod.getUser', ['user-1'])).toBe('first')
     expect(globalQueue.consume('mod.getUser', ['user-1'])).toBe('second')
@@ -47,13 +47,13 @@ describe('globalQueue', () => {
   })
 
   it('matches deep-equal objects', () => {
-    globalQueue.add({ fnName: 'mod.create', args: [{ name: 'Alice', age: 30 }], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.create', args: [{ name: 'Alice', age: 30 }], response: { type: responseType.return, value: 'ok' } })
 
     expect(globalQueue.consume('mod.create', [{ name: 'Alice', age: 30 }])).toBe('ok')
   })
 
   it('rejects structurally different objects', () => {
-    globalQueue.add({ fnName: 'mod.create', args: [{ name: 'Alice', age: 30 }], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.create', args: [{ name: 'Alice', age: 30 }], response: { type: responseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow(
       'mod.create() was called with wrong arguments\n\n' +
@@ -63,13 +63,13 @@ describe('globalQueue', () => {
   })
 
   it('matches nested objects', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: responseType.return, value: 'ok' } })
 
     expect(globalQueue.consume('mod.fn', [{ a: { b: { c: 1 } } }])).toBe('ok')
   })
 
   it('rejects nested objects with different values', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: responseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
@@ -79,13 +79,13 @@ describe('globalQueue', () => {
   })
 
   it('matches arrays', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: responseType.return, value: 'ok' } })
 
     expect(globalQueue.consume('mod.fn', [[1, 2, 3]])).toBe('ok')
   })
 
   it('rejects arrays with different length', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: responseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
@@ -95,7 +95,7 @@ describe('globalQueue', () => {
   })
 
   it('rejects arrays with different values', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: responseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
@@ -105,7 +105,7 @@ describe('globalQueue', () => {
   })
 
   it('distinguishes null from objects', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [null], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [null], response: { type: responseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{}])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
@@ -115,7 +115,7 @@ describe('globalQueue', () => {
   })
 
   it('distinguishes arrays from objects', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2]], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2]], response: { type: responseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
@@ -125,13 +125,13 @@ describe('globalQueue', () => {
   })
 
   it('matches primitives by value', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [42, 'hello', true, null, undefined], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [42, 'hello', true, null, undefined], response: { type: responseType.return, value: 'ok' } })
 
     expect(globalQueue.consume('mod.fn', [42, 'hello', true, null, undefined])).toBe('ok')
   })
 
   it('rejects objects with extra keys', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1 }], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1 }], response: { type: responseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
@@ -141,7 +141,7 @@ describe('globalQueue', () => {
   })
 
   it('rejects objects with missing keys', () => {
-    globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1, b: 2 }], response: { type: 'return', value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1, b: 2 }], response: { type: responseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
@@ -151,8 +151,8 @@ describe('globalQueue', () => {
   })
 
   it('getUnconsumed returns remaining expectations', () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'Alice' } })
-    globalQueue.add({ fnName: 'mod.sendEmail', args: ['user-1'], response: { type: 'return', value: undefined } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.return, value: 'Alice' } })
+    globalQueue.add({ fnName: 'mod.sendEmail', args: ['user-1'], response: { type: responseType.return, value: undefined } })
 
     globalQueue.consume('mod.getUser', ['user-1'])
 
@@ -162,40 +162,40 @@ describe('globalQueue', () => {
   })
 
   it('getUnconsumed returns empty after all consumed', () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'Alice' } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.return, value: 'Alice' } })
     globalQueue.consume('mod.getUser', ['user-1'])
 
     expect(globalQueue.getUnconsumed()).toHaveLength(0)
   })
 
   it('reset clears all expectations', () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'Alice' } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.return, value: 'Alice' } })
     globalQueue.reset()
 
     expect(globalQueue.getUnconsumed()).toHaveLength(0)
   })
 
   it('throws the error when response type is throw', () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'throw', error: new Error('fail') } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.throw, error: new Error('fail') } })
 
     expect(() => globalQueue.consume('mod.getUser', ['user-1'])).toThrow('fail')
   })
 
   it('returns a rejected promise when response type is reject', async () => {
-    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'reject', error: new Error('denied') } })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: responseType.reject, error: new Error('denied') } })
 
     await expect(globalQueue.consume('mod.getUser', ['user-1'])).rejects.toThrow('denied')
   })
 
   it('invokes callback and returns its result', () => {
-    globalQueue.add({ fnName: 'mod.add', args: [1, 2], response: { type: 'callback', fn: (a: number, b: number) => a + b } })
+    globalQueue.add({ fnName: 'mod.add', args: [1, 2], response: { type: responseType.callback, fn: (a: number, b: number) => a + b } })
 
     expect(globalQueue.consume('mod.add', [1, 2])).toBe(3)
   })
 
   it('callback receives the called args', () => {
     const received: unknown[] = []
-    globalQueue.add({ fnName: 'mod.fn', args: ['x'], response: { type: 'callback', fn: (...args: unknown[]) => { received.push(...args); return 'ok' } } })
+    globalQueue.add({ fnName: 'mod.fn', args: ['x'], response: { type: responseType.callback, fn: (...args: unknown[]) => { received.push(...args); return 'ok' } } })
 
     globalQueue.consume('mod.fn', ['x'])
     expect(received).toEqual(['x'])
