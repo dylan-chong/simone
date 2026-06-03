@@ -3,6 +3,23 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-06-04
+### Added
+- `ramda` as runtime dependency for robust deep equality comparison
+- Circular reference detection in diff output (shows `[Circular]`)
+- Helpful error when `mockModule()` called without Vite plugin configured
+
+### Fixed
+- Plugin import-removal no longer strips co-imported names (e.g. `verifyAll` alongside `mockModule`)
+- Plugin regex now handles nested angle brackets in type params (e.g. `Record<string, Fn>`)
+
+### Changed
+- Deep equality uses `R.equals` instead of custom implementation — correctly handles Date, RegExp, Map, Set
+- Plugin internals extracted into well-named helpers (`replaceMockModuleCalls`, `stripMockModuleImport`, `resolveModulePath`)
+- All `while` loops replaced with `for...of` using `matchAll`
+- All `let` variables replaced with `const` using `reduce` and early-return helpers
+- `else` block in `formatArgsDiff` flattened with `continue`
+
 ## [1.4.2] - 2026-06-03
 ### Added
 - 100% code coverage enforcement for both main project and example
