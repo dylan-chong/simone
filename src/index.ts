@@ -5,9 +5,9 @@ import type { MockModuleInstance } from './types'
 
 export type { MockedModule, MockModuleInstance, Expectation, ExpectationWithArgs, FunctionKeys } from './types'
 
-export function mockModule<T>(path: string): MockModuleInstance<T> {
+export function mockModule<Module>(path: string): MockModuleInstance<Module> {
   const moduleName = path.replace(/^.*\//, '').replace(/\.\w+$/, '')
-  return createMockModule<T>(moduleName, [])
+  return createMockModule<Module>(moduleName, [])
 }
 
 export function verifyAll(): void {

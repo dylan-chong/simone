@@ -2,13 +2,13 @@ import { globalQueue } from './expectation'
 import { registry, type Resettable } from './registry'
 import type { MockModuleInstance, Expectation, ExpectationWithArgs } from './types'
 
-type MockModuleInternal<T> = MockModuleInstance<T> & Resettable
+type MockModuleInternal<Module> = MockModuleInstance<Module> & Resettable
 
-export function createMockModule<T>(moduleName: string, functionNames: string[]): MockModuleInternal<T> {
+export function createMockModule<Module>(moduleName: string, functionNames: string[]): MockModuleInternal<Module> {
   const neverFns = new Set<string>()
   const configuredFns = new Set<string>()
 
-  const mod: MockModuleInternal<T> = {
+  const mod: MockModuleInternal<Module> = {
     expects(name: string): any {
       if (!functionNames.includes(name)) {
         throw new Error(`simone: '${name}' is not a function export`)
@@ -38,7 +38,7 @@ export function createMockModule<T>(moduleName: string, functionNames: string[])
       neverFns.clear()
       configuredFns.clear()
     },
-  } as MockModuleInternal<T>
+  } as MockModuleInternal<Module>
 
   for (const name of functionNames) {
     (mod as any)[name] = (...args: unknown[]) => {
