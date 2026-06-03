@@ -9,6 +9,20 @@ import {
   nestedConfigWithChanges,
 } from './fixtures/complex-args'
 
+function sorted(value: unknown): string {
+  return JSON.stringify(sortKeys(value), null, 2)
+}
+
+function sortKeys(value: unknown): unknown {
+  if (value === null || typeof value !== 'object') return value
+  if (Array.isArray(value)) return value.map(sortKeys)
+  const obj: Record<string, unknown> = {}
+  for (const key of Object.keys(value as Record<string, unknown>).sort()) {
+    obj[key] = sortKeys((value as Record<string, unknown>)[key])
+  }
+  return obj
+}
+
 describe('globalQueue', () => {
   beforeEach(() => {
     globalQueue.reset()
@@ -65,8 +79,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow(
       'mod.create() was called with wrong arguments\n\n' +
-      '- arg 0: {\n  "name": "Alice",\n  "age": 30\n}\n' +
-      '+ arg 0: {\n  "name": "Bob",\n  "age": 30\n}'
+      '- arg 0: {\n  "age": 30,\n  "name": "Alice"\n}\n' +
+      '+ arg 0: {\n  "age": 30,\n  "name": "Bob"\n}'
     )
   })
 
@@ -255,8 +269,8 @@ describe('globalQueue', () => {
     expect(() => globalQueue.consume('mod.updateUser', ['user-1', userWithDifferentAddress])).toThrow(
       'mod.updateUser() was called with wrong arguments\n\n' +
       '  arg 0: "user-1"\n' +
-      '- arg 1: ' + JSON.stringify(userWithAddress, null, 2) + '\n' +
-      '+ arg 1: ' + JSON.stringify(userWithDifferentAddress, null, 2)
+      '- arg 1: ' + sorted(userWithAddress) + '\n' +
+      '+ arg 1: ' + sorted(userWithDifferentAddress)
     )
   })
 
@@ -280,10 +294,10 @@ describe('globalQueue', () => {
     expect(() => globalQueue.consume('mod.processOrder', ['shop-1', orderWithDifferentItems, true, userWithAddress, 42])).toThrow(
       'mod.processOrder() was called with wrong arguments\n\n' +
       '  arg 0: "shop-1"\n' +
-      '- arg 1: ' + JSON.stringify(orderWithItems, null, 2) + '\n' +
-      '+ arg 1: ' + JSON.stringify(orderWithDifferentItems, null, 2) + '\n' +
+      '- arg 1: ' + sorted(orderWithItems) + '\n' +
+      '+ arg 1: ' + sorted(orderWithDifferentItems) + '\n' +
       '  arg 2: true\n' +
-      '  arg 3: ' + JSON.stringify(userWithAddress, null, 2) + '\n' +
+      '  arg 3: ' + sorted(userWithAddress) + '\n' +
       '  arg 4: 42'
     )
   })
@@ -297,11 +311,11 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.sync', [nestedConfig, 'staging', 3, userWithAddress])).toThrow(
       'mod.sync() was called with wrong arguments\n\n' +
-      '  arg 0: ' + JSON.stringify(nestedConfig, null, 2) + '\n' +
+      '  arg 0: ' + sorted(nestedConfig) + '\n' +
       '- arg 1: "production"\n' +
       '+ arg 1: "staging"\n' +
       '  arg 2: 3\n' +
-      '  arg 3: ' + JSON.stringify(userWithAddress, null, 2)
+      '  arg 3: ' + sorted(userWithAddress)
     )
   })
 
@@ -316,8 +330,8 @@ describe('globalQueue', () => {
       'mod.save() was called with wrong arguments\n\n' +
       '  arg 0: "tenant-1"\n' +
       '  arg 1: true\n' +
-      '- arg 2: ' + JSON.stringify(nestedConfig, null, 2) + '\n' +
-      '+ arg 2: ' + JSON.stringify(nestedConfigWithChanges, null, 2)
+      '- arg 2: ' + sorted(nestedConfig) + '\n' +
+      '+ arg 2: ' + sorted(nestedConfigWithChanges)
     )
   })
 })

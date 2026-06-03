@@ -78,8 +78,8 @@ function formatArgsDiff(expected: unknown[], actual: unknown[]): string {
   const lines: string[] = []
   const maxLen = Math.max(expected.length, actual.length)
   for (let i = 0; i < maxLen; i++) {
-    const exp = i < expected.length ? JSON.stringify(expected[i], null, 2) : undefined
-    const act = i < actual.length ? JSON.stringify(actual[i], null, 2) : undefined
+    const exp = i < expected.length ? stableStringify(expected[i]) : undefined
+    const act = i < actual.length ? stableStringify(actual[i]) : undefined
     if (exp === act) {
       lines.push(`  arg ${i}: ${act}`)
     } else {
@@ -88,6 +88,20 @@ function formatArgsDiff(expected: unknown[], actual: unknown[]): string {
     }
   }
   return lines.join('\n')
+}
+
+function stableStringify(value: unknown): string {
+  return JSON.stringify(sortKeys(value), null, 2)
+}
+
+function sortKeys(value: unknown): unknown {
+  if (value === null || typeof value !== 'object') return value
+  if (Array.isArray(value)) return value.map(sortKeys)
+  const sorted: Record<string, unknown> = {}
+  for (const key of Object.keys(value as Record<string, unknown>).sort()) {
+    sorted[key] = sortKeys((value as Record<string, unknown>)[key])
+  }
+  return sorted
 }
 
 function deepEqual(a: unknown, b: unknown): boolean {
