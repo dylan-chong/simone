@@ -48,7 +48,7 @@ describe('integration: mockModule with global ordering', () => {
 
     // Calling otherService before mathService violates global order
     expect(() => otherService.doThing()).toThrow(
-      'expected mathService.add(1, 2) to be called next'
+      'simone: expected mathService.add(1, 2) to be called next'
     )
   })
 

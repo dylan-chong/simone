@@ -47,11 +47,10 @@ describe('createMockModule', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
 
-    expect(() => mod.getUser('wrong-id')).toThrow(
-      'userService.getUser() was called with wrong arguments\n\n' +
-      '- arg 0: "user-1"\n' +
-      '+ arg 0: "wrong-id"'
-    )
+    expect(() => mod.getUser('wrong-id')).toThrow(`simone: userService.getUser() was called with wrong arguments
+
+- arg 0: "user-1"
++ arg 0: "wrong-id"`)
   })
 
   it('enforces global ordering across functions', () => {
@@ -60,7 +59,7 @@ describe('createMockModule', () => {
     mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: '2' }))
 
     expect(() => mod.createUser('Bob', 25)).toThrow(
-      'expected userService.getUser("user-1") to be called next, but userService.createUser("Bob", 25) was called'
+      'simone: expected userService.getUser("user-1") to be called next, but userService.createUser("Bob", 25) was called'
     )
   })
 
@@ -93,13 +92,12 @@ describe('createMockModule', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: 'new-1' }))
 
-    expect(() => mod.createUser('Alice', 30)).toThrow(
-      'userService.createUser() was called with wrong arguments\n\n' +
-      '- arg 0: "Bob"\n' +
-      '+ arg 0: "Alice"\n' +
-      '- arg 1: 25\n' +
-      '+ arg 1: 30'
-    )
+    expect(() => mod.createUser('Alice', 30)).toThrow(`simone: userService.createUser() was called with wrong arguments
+
+- arg 0: "Bob"
++ arg 0: "Alice"
+- arg 1: 25
++ arg 1: 30`)
   })
 
   it('calls invokes callback with matched args', async () => {
@@ -114,11 +112,10 @@ describe('createMockModule', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('getUser').withArgs('user-1').calls(async (id) => ({ id, name: 'X' }))
 
-    expect(() => mod.getUser('wrong-id')).toThrow(
-      'userService.getUser() was called with wrong arguments\n\n' +
-      '- arg 0: "user-1"\n' +
-      '+ arg 0: "wrong-id"'
-    )
+    expect(() => mod.getUser('wrong-id')).toThrow(`simone: userService.getUser() was called with wrong arguments
+
+- arg 0: "user-1"
++ arg 0: "wrong-id"`)
   })
 
   it('throws causes stub to throw the given error', () => {

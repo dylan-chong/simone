@@ -29,20 +29,20 @@ class GlobalExpectationQueue {
   consume(fnName: string, calledArgs: unknown[]): unknown {
     if (this.consumedCount >= this.queue.length) {
       throw new Error(
-        `${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`
+        `simone: ${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`
       )
     }
 
     const next = this.queue[this.consumedCount]
     if (next.fnName !== fnName) {
       throw new Error(
-        `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
+        `simone: expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
       )
     }
     if (!deepEqual(next.args, calledArgs)) {
       this.hadArgMismatch = true
       throw new Error(
-        `${fnName}() was called with wrong arguments\n\n` +
+        `simone: ${fnName}() was called with wrong arguments\n\n` +
         formatArgsDiff(next.args, calledArgs)
       )
     }
