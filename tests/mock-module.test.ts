@@ -91,6 +91,21 @@ describe('createMockModule', () => {
     expect(() => mod.createUser('Alice', 30)).toThrow()
   })
 
+  it('calls invokes callback with matched args', async () => {
+    const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
+    mod.expects('getUser').withArgs('user-1').calls(async (id) => ({ id, name: 'Dynamic' }))
+
+    const result = await mod.getUser('user-1')
+    expect(result).toEqual({ id: 'user-1', name: 'Dynamic' })
+  })
+
+  it('calls still enforces arg matching', () => {
+    const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
+    mod.expects('getUser').withArgs('user-1').calls(async (id) => ({ id, name: 'X' }))
+
+    expect(() => mod.getUser('wrong-id')).toThrow()
+  })
+
   it('registers itself in the global registry', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     expect(registry.getAll()).toContain(mod)

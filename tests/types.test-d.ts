@@ -59,6 +59,11 @@ test('withArgs enforces multiple argument types', () => {
   expectTypeOf<CreateUserWithArgs>().parameters.toEqualTypeOf<[name: string, age: string]>()
 })
 
+test('calls enforces correct function signature', () => {
+  type EWA = ExpectationWithArgs<TestModule['getUser']>
+  expectTypeOf<EWA['calls']>().parameter(0).toEqualTypeOf<TestModule['getUser']>()
+})
+
 test('MockModuleInstance has both expects and callable function stubs', () => {
   type Instance = MockModuleInstance<TestModule>
   // Has expects method

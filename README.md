@@ -38,6 +38,15 @@ it('loads a user profile', async () => {
   const profile = await loadProfile('user-1')
   expect(profile.name).toBe('Alice')
 })
+
+it('uses a callback for dynamic return values', async () => {
+  userService.expects('getUser').withArgs('user-1').calls(
+    async (id) => ({ id, name: `User-${id}` })
+  )
+
+  const profile = await loadProfile('user-1')
+  expect(profile.name).toBe('User-user-1')
+})
 ```
 
 See the [`example/`](./example) directory for complete working examples:
@@ -56,6 +65,10 @@ Creates a typed mock for all function exports of the module at `path`.
 ### `.expects(name).withArgs(...args).returns(value)`
 
 Sets up an expectation: when `name` is called with `args`, return `value`. Each expectation is consumed once in declaration order. All args and return values are type-checked against the original function signature.
+
+### `.expects(name).withArgs(...args).calls(fn)`
+
+Like `.returns()`, but invokes `fn` with the matched args to compute the return value. `fn` must match the original function's signature.
 
 ## Strict Behavior
 

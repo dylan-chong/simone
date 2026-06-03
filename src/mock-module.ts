@@ -24,6 +24,14 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
                 returnValue: value,
               })
             },
+            calls(fn: (...a: any[]) => unknown): void {
+              globalQueue.add({
+                fnId: `${moduleName}.${name}`,
+                args,
+                returnValue: undefined,
+                callback: fn,
+              })
+            },
           }
         },
       }

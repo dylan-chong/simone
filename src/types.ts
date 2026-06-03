@@ -12,6 +12,7 @@ export interface Expectation<Fn> {
 
 export interface ExpectationWithArgs<Fn> {
   returns(value: Fn extends (...a: any[]) => infer R ? R : never): void
+  calls(fn: Fn): void
 }
 
 export type MockModuleInstance<Module> = MockedModule<Module> & {

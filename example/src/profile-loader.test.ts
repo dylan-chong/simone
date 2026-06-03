@@ -21,6 +21,20 @@ describe('loadProfile', () => {
     expect(profile.loadedAt).toBeTypeOf('number')
   })
 
+  it('uses .calls() for dynamic return values', async () => {
+    userService.expects('getUser').withArgs('user-1').calls(
+      async (id) => ({ id, name: `User-${id}` })
+    )
+    emailService.expects('getEmailPreferences').withArgs('user-1').calls(
+      async () => ({ marketing: false, notifications: true })
+    )
+
+    const profile = await loadProfile('user-1')
+
+    expect(profile.name).toBe('User-user-1')
+    expect(profile.emailPrefs).toEqual({ marketing: false, notifications: true })
+  })
+
   it('loads multiple users in order', async () => {
     userService.expects('getUser').withArgs('user-1').returns(
       Promise.resolve({ id: 'user-1', name: 'Alice' })

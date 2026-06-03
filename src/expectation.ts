@@ -2,6 +2,7 @@ interface QueuedExpectation {
   fnId: string
   args: unknown[]
   returnValue: unknown
+  callback?: (...args: any[]) => unknown
 }
 
 class GlobalExpectationQueue {
@@ -27,6 +28,9 @@ class GlobalExpectationQueue {
     }
 
     this.cursor++
+    if (next.callback) {
+      return next.callback(...calledArgs)
+    }
     return next.returnValue
   }
 
