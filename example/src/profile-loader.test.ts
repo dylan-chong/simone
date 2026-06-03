@@ -35,6 +35,28 @@ describe('loadProfile', () => {
     expect(profile.emailPrefs).toEqual({ marketing: false, notifications: true })
   })
 
+  it('uses .resolves() as shorthand for Promise.resolve', async () => {
+    userService.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
+    emailService.expects('getEmailPreferences').withArgs('user-1').resolves({ marketing: true, notifications: false })
+
+    const profile = await loadProfile('user-1')
+
+    expect(profile.name).toBe('Alice')
+    expect(profile.emailPrefs).toEqual({ marketing: true, notifications: false })
+  })
+
+  it('uses .throws() to simulate a sync error', async () => {
+    userService.expects('getUser').withArgs('user-1').throws(new Error('db offline'))
+
+    await expect(loadProfile('user-1')).rejects.toThrow('db offline')
+  })
+
+  it('uses .rejects() to simulate a rejected promise', async () => {
+    userService.expects('getUser').withArgs('user-1').rejects(new Error('timeout'))
+
+    await expect(loadProfile('user-1')).rejects.toThrow('timeout')
+  })
+
   it('loads multiple users in order', async () => {
     userService.expects('getUser').withArgs('user-1').returns(
       Promise.resolve({ id: 'user-1', name: 'Alice' })

@@ -66,9 +66,21 @@ Creates a typed mock for all function exports of the module at `path`.
 
 Sets up an expectation: when `name` is called with `args`, return `value`. Each expectation is consumed once in declaration order. All args and return values are type-checked against the original function signature.
 
+### `.expects(name).withArgs(...args).throws(error)`
+
+Causes the stub to throw `error` synchronously when called.
+
+### `.expects(name).withArgs(...args).resolves(value)`
+
+Shorthand for `.returns(Promise.resolve(value))`. Only available when the function returns a `Promise` — compile error otherwise.
+
+### `.expects(name).withArgs(...args).rejects(error)`
+
+Shorthand for `.returns(Promise.reject(error))`. Only available when the function returns a `Promise`.
+
 ### `.expects(name).withArgs(...args).calls(fn)`
 
-Like `.returns()`, but invokes `fn` with the matched args to compute the return value. `fn` must match the original function's signature.
+Invokes `fn` with the matched args to compute the return value. `fn` must match the original function's signature.
 
 ## Strict Behavior
 
@@ -77,4 +89,12 @@ Like `.returns()`, but invokes `fn` with the matched args to compute the return 
 - Calling functions out of declaration order → throws immediately
 - Setting up an expectation that is never consumed → test fails after it completes
 - Calling `.expects()` with a name that doesn't exist on the module → compile error + runtime error
+
+## Releasing
+
+1. Add an entry to `CHANGELOG.md` under a new version heading
+2. Bump `version` in `package.json`
+3. Commit: `git commit -am "chore: release vX.Y.Z"`
+4. Tag: `git tag vX.Y.Z`
+5. Push: `git push && git push --tags`
 

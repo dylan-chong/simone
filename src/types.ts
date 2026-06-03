@@ -12,6 +12,9 @@ export interface Expectation<Fn> {
 
 export interface ExpectationWithArgs<Fn> {
   returns(value: Fn extends (...a: any[]) => infer R ? R : never): void
+  throws(error: unknown): void
+  resolves(value: Fn extends (...a: any[]) => Promise<infer V> ? V : never): void
+  rejects(error: unknown): void
   calls(fn: Fn): void
 }
 

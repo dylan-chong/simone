@@ -106,6 +106,28 @@ describe('createMockModule', () => {
     expect(() => mod.getUser('wrong-id')).toThrow()
   })
 
+  it('throws causes stub to throw the given error', () => {
+    const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
+    mod.expects('getUser').withArgs('user-1').throws(new Error('db connection failed'))
+
+    expect(() => mod.getUser('user-1')).toThrow('db connection failed')
+  })
+
+  it('resolves returns a resolved promise with the value', async () => {
+    const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
+    mod.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
+
+    const result = await mod.getUser('user-1')
+    expect(result).toEqual({ id: 'user-1', name: 'Alice' })
+  })
+
+  it('rejects returns a rejected promise with the error', async () => {
+    const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
+    mod.expects('getUser').withArgs('user-1').rejects(new Error('not found'))
+
+    await expect(mod.getUser('user-1')).rejects.toThrow('not found')
+  })
+
   it('registers itself in the global registry', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     expect(registry.getAll()).toContain(mod)

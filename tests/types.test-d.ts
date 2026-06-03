@@ -64,6 +64,18 @@ test('calls enforces correct function signature', () => {
   expectTypeOf<EWA['calls']>().parameter(0).toEqualTypeOf<TestModule['getUser']>()
 })
 
+test('resolves unwraps Promise return type', () => {
+  type EWA = ExpectationWithArgs<TestModule['getUser']>
+  // getUser returns Promise<{ id: string; name: string }>, so resolves accepts the unwrapped type
+  expectTypeOf<EWA['resolves']>().parameter(0).toEqualTypeOf<{ id: string; name: string }>()
+})
+
+test('resolves is never for non-Promise return types', () => {
+  type SyncModule = { syncFn: (x: number) => number }
+  type EWA = ExpectationWithArgs<SyncModule['syncFn']>
+  expectTypeOf<EWA['resolves']>().parameter(0).toEqualTypeOf<never>()
+})
+
 test('MockModuleInstance has both expects and callable function stubs', () => {
   type Instance = MockModuleInstance<TestModule>
   // Has expects method
