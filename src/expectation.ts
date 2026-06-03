@@ -1,8 +1,15 @@
+export enum responseType {
+  return = 'return',
+  throw = 'throw',
+  reject = 'reject',
+  callback = 'callback',
+}
+
 type Response =
-  | { type: 'return'; value: unknown }
-  | { type: 'throw'; error: unknown }
-  | { type: 'reject'; error: unknown }
-  | { type: 'callback'; fn: (...args: any[]) => unknown }
+  | { type: responseType.return; value: unknown }
+  | { type: responseType.throw; error: unknown }
+  | { type: responseType.reject; error: unknown }
+  | { type: responseType.callback; fn: (...args: any[]) => unknown }
 
 interface QueuedExpectation {
   fnName: string
@@ -12,46 +19,46 @@ interface QueuedExpectation {
 
 class GlobalExpectationQueue {
   private queue: QueuedExpectation[] = []
-  private cursor = 0
+  private consumedCount = 0
 
   add(expectation: QueuedExpectation): void {
     this.queue.push(expectation)
   }
 
   consume(fnName: string, calledArgs: unknown[]): unknown {
-    if (this.cursor >= this.queue.length) {
+    if (this.consumedCount >= this.queue.length) {
       throw new Error(
         `${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`
       )
     }
 
-    const next = this.queue[this.cursor]
+    const next = this.queue[this.consumedCount]
     if (next.fnName !== fnName || !deepEqual(next.args, calledArgs)) {
       throw new Error(
         `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
       )
     }
 
-    this.cursor++
-    if (next.response.type === 'throw') {
+    this.consumedCount++
+    if (next.response.type === responseType.throw) {
       throw next.response.error
     }
-    if (next.response.type === 'reject') {
+    if (next.response.type === responseType.reject) {
       return Promise.reject(next.response.error)
     }
-    if (next.response.type === 'callback') {
+    if (next.response.type === responseType.callback) {
       return next.response.fn(...calledArgs)
     }
     return next.response.value
   }
 
   getUnconsumed(): QueuedExpectation[] {
-    return this.queue.slice(this.cursor)
+    return this.queue.slice(this.consumedCount)
   }
 
   reset(): void {
     this.queue = []
-    this.cursor = 0
+    this.consumedCount = 0
   }
 }
 
