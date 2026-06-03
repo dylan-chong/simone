@@ -53,7 +53,9 @@ describe('globalQueue', () => {
   it('rejects structurally different objects', () => {
     globalQueue.add({ fnName: 'mod.create', args: [{ name: 'Alice', age: 30 }], response: { type: 'return', value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow()
+    expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow(
+      'expected mod.create({"name":"Alice","age":30}) to be called next, but mod.create({"name":"Bob","age":30}) was called'
+    )
   })
 
   it('matches nested objects', () => {
@@ -65,7 +67,9 @@ describe('globalQueue', () => {
   it('rejects nested objects with different values', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: 'return', value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow()
+    expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow(
+      'expected mod.fn({"a":{"b":{"c":1}}}) to be called next, but mod.fn({"a":{"b":{"c":2}}}) was called'
+    )
   })
 
   it('matches arrays', () => {
@@ -77,25 +81,33 @@ describe('globalQueue', () => {
   it('rejects arrays with different length', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow()
+    expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow(
+      'expected mod.fn([1,2,3]) to be called next, but mod.fn([1,2]) was called'
+    )
   })
 
   it('rejects arrays with different values', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow()
+    expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow(
+      'expected mod.fn([1,2,3]) to be called next, but mod.fn([1,2,4]) was called'
+    )
   })
 
   it('distinguishes null from objects', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [null], response: { type: 'return', value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{}])).toThrow()
+    expect(() => globalQueue.consume('mod.fn', [{}])).toThrow(
+      'expected mod.fn(null) to be called next, but mod.fn({}) was called'
+    )
   })
 
   it('distinguishes arrays from objects', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2]], response: { type: 'return', value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow()
+    expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow(
+      'expected mod.fn([1,2]) to be called next, but mod.fn({"0":1,"1":2}) was called'
+    )
   })
 
   it('matches primitives by value', () => {
@@ -107,13 +119,17 @@ describe('globalQueue', () => {
   it('rejects objects with extra keys', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1 }], response: { type: 'return', value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow()
+    expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow(
+      'expected mod.fn({"a":1}) to be called next, but mod.fn({"a":1,"b":2}) was called'
+    )
   })
 
   it('rejects objects with missing keys', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1, b: 2 }], response: { type: 'return', value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow()
+    expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow(
+      'expected mod.fn({"a":1,"b":2}) to be called next, but mod.fn({"a":1}) was called'
+    )
   })
 
   it('getUnconsumed returns remaining expectations', () => {

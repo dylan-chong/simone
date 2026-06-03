@@ -47,7 +47,9 @@ describe('createMockModule', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
 
-    expect(() => mod.getUser('wrong-id')).toThrow()
+    expect(() => mod.getUser('wrong-id')).toThrow(
+      'expected userService.getUser("user-1") to be called next, but userService.getUser("wrong-id") was called'
+    )
   })
 
   it('enforces global ordering across functions', () => {
@@ -55,8 +57,9 @@ describe('createMockModule', () => {
     mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
     mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: '2' }))
 
-    // Calling createUser before getUser violates order
-    expect(() => mod.createUser('Bob', 25)).toThrow()
+    expect(() => mod.createUser('Bob', 25)).toThrow(
+      'expected userService.getUser("user-1") to be called next, but userService.createUser("Bob", 25) was called'
+    )
   })
 
   it('expects throws for non-existent function name', () => {
@@ -88,7 +91,9 @@ describe('createMockModule', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: 'new-1' }))
 
-    expect(() => mod.createUser('Alice', 30)).toThrow()
+    expect(() => mod.createUser('Alice', 30)).toThrow(
+      'expected userService.createUser("Bob", 25) to be called next, but userService.createUser("Alice", 30) was called'
+    )
   })
 
   it('calls invokes callback with matched args', async () => {
@@ -103,7 +108,9 @@ describe('createMockModule', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('getUser').withArgs('user-1').calls(async (id) => ({ id, name: 'X' }))
 
-    expect(() => mod.getUser('wrong-id')).toThrow()
+    expect(() => mod.getUser('wrong-id')).toThrow(
+      'expected userService.getUser("user-1") to be called next, but userService.getUser("wrong-id") was called'
+    )
   })
 
   it('throws causes stub to throw the given error', () => {
