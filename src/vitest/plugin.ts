@@ -55,7 +55,15 @@ function replaceMockModuleCalls(code: string, mocks: { varName: string; path: st
 }
 
 function stripMockModuleImport(code: string): string {
-  return code.replace(/import\s*\{[^}]*\bmockModule\b[^}]*\}\s*from\s*['"][^'"]+['"]\s*;?\n?/g, '')
+  return code.replace(
+    /import\s*\{([^}]*)\}\s*from\s*(['"][^'"]+['"])\s*;?\n?/g,
+    (full, imports: string, source: string) => {
+      if (!imports.includes('mockModule')) return full
+      const remaining = imports.split(',').map((s) => s.trim()).filter((s) => s && s !== 'mockModule')
+      if (remaining.length === 0) return ''
+      return `import { ${remaining.join(', ')} } from ${source};\n`
+    }
+  )
 }
 
 function resolveModulePath(basePath: string): string | null {
