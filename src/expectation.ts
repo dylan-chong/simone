@@ -88,13 +88,25 @@ function formatArgsDiff(expected: unknown[], actual: unknown[]): string {
     const exp = i < expected.length ? stableStringify(expected[i]) : undefined
     const act = i < actual.length ? stableStringify(actual[i]) : undefined
     if (exp === act) {
-      lines.push(`  arg ${i}: ${act}`)
+      const prefix = `  arg ${i}: `
+      lines.push(prefix + indent(act!, prefix.length))
     } else {
-      if (exp !== undefined) lines.push(`- arg ${i}: ${exp}`)
-      if (act !== undefined) lines.push(`+ arg ${i}: ${act}`)
+      if (exp !== undefined) {
+        const prefix = `- arg ${i}: `
+        lines.push(prefix + indent(exp, prefix.length))
+      }
+      if (act !== undefined) {
+        const prefix = `+ arg ${i}: `
+        lines.push(prefix + indent(act, prefix.length))
+      }
     }
   }
   return lines.join('\n')
+}
+
+function indent(str: string, width: number): string {
+  const pad = ' '.repeat(width)
+  return str.split('\n').join('\n' + pad)
 }
 
 function stableStringify(value: unknown): string {

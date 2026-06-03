@@ -13,6 +13,13 @@ function sorted(value: unknown): string {
   return JSON.stringify(sortKeys(value), null, 2)
 }
 
+function arg(marker: string, index: number, value: unknown): string {
+  const prefix = `${marker} arg ${index}: `
+  const str = sorted(value)
+  const pad = ' '.repeat(prefix.length)
+  return prefix + str.split('\n').join('\n' + pad)
+}
+
 function sortKeys(value: unknown): unknown {
   if (value === null || typeof value !== 'object') return value
   if (Array.isArray(value)) return value.map(sortKeys)
@@ -79,8 +86,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow(
       'mod.create() was called with wrong arguments\n\n' +
-      '- arg 0: {\n  "age": 30,\n  "name": "Alice"\n}\n' +
-      '+ arg 0: {\n  "age": 30,\n  "name": "Bob"\n}'
+      arg('-', 0, { name: 'Alice', age: 30 }) + '\n' +
+      arg('+', 0, { name: 'Bob', age: 30 })
     )
   })
 
@@ -95,8 +102,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
-      '- arg 0: {\n  "a": {\n    "b": {\n      "c": 1\n    }\n  }\n}\n' +
-      '+ arg 0: {\n  "a": {\n    "b": {\n      "c": 2\n    }\n  }\n}'
+      arg('-', 0, { a: { b: { c: 1 } } }) + '\n' +
+      arg('+', 0, { a: { b: { c: 2 } } })
     )
   })
 
@@ -111,8 +118,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
-      '- arg 0: [\n  1,\n  2,\n  3\n]\n' +
-      '+ arg 0: [\n  1,\n  2\n]'
+      arg('-', 0, [1, 2, 3]) + '\n' +
+      arg('+', 0, [1, 2])
     )
   })
 
@@ -121,8 +128,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
-      '- arg 0: [\n  1,\n  2,\n  3\n]\n' +
-      '+ arg 0: [\n  1,\n  2,\n  4\n]'
+      arg('-', 0, [1, 2, 3]) + '\n' +
+      arg('+', 0, [1, 2, 4])
     )
   })
 
@@ -141,8 +148,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
-      '- arg 0: [\n  1,\n  2\n]\n' +
-      '+ arg 0: {\n  "0": 1,\n  "1": 2\n}'
+      arg('-', 0, [1, 2]) + '\n' +
+      arg('+', 0, { 0: 1, 1: 2 })
     )
   })
 
@@ -157,8 +164,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
-      '- arg 0: {\n  "a": 1\n}\n' +
-      '+ arg 0: {\n  "a": 1,\n  "b": 2\n}'
+      arg('-', 0, { a: 1 }) + '\n' +
+      arg('+', 0, { a: 1, b: 2 })
     )
   })
 
@@ -167,8 +174,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
-      '- arg 0: {\n  "a": 1,\n  "b": 2\n}\n' +
-      '+ arg 0: {\n  "a": 1\n}'
+      arg('-', 0, { a: 1, b: 2 }) + '\n' +
+      arg('+', 0, { a: 1 })
     )
   })
 
@@ -294,9 +301,9 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.updateUser', ['user-1', userWithDifferentAddress])).toThrow(
       'mod.updateUser() was called with wrong arguments\n\n' +
-      '  arg 0: "user-1"\n' +
-      '- arg 1: ' + sorted(userWithAddress) + '\n' +
-      '+ arg 1: ' + sorted(userWithDifferentAddress)
+      arg(' ', 0, 'user-1') + '\n' +
+      arg('-', 1, userWithAddress) + '\n' +
+      arg('+', 1, userWithDifferentAddress)
     )
   })
 
@@ -319,12 +326,12 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.processOrder', ['shop-1', orderWithDifferentItems, true, userWithAddress, 42])).toThrow(
       'mod.processOrder() was called with wrong arguments\n\n' +
-      '  arg 0: "shop-1"\n' +
-      '- arg 1: ' + sorted(orderWithItems) + '\n' +
-      '+ arg 1: ' + sorted(orderWithDifferentItems) + '\n' +
-      '  arg 2: true\n' +
-      '  arg 3: ' + sorted(userWithAddress) + '\n' +
-      '  arg 4: 42'
+      arg(' ', 0, 'shop-1') + '\n' +
+      arg('-', 1, orderWithItems) + '\n' +
+      arg('+', 1, orderWithDifferentItems) + '\n' +
+      arg(' ', 2, true) + '\n' +
+      arg(' ', 3, userWithAddress) + '\n' +
+      arg(' ', 4, 42)
     )
   })
 
@@ -337,11 +344,11 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.sync', [nestedConfig, 'staging', 3, userWithAddress])).toThrow(
       'mod.sync() was called with wrong arguments\n\n' +
-      '  arg 0: ' + sorted(nestedConfig) + '\n' +
-      '- arg 1: "production"\n' +
-      '+ arg 1: "staging"\n' +
-      '  arg 2: 3\n' +
-      '  arg 3: ' + sorted(userWithAddress)
+      arg(' ', 0, nestedConfig) + '\n' +
+      arg('-', 1, 'production') + '\n' +
+      arg('+', 1, 'staging') + '\n' +
+      arg(' ', 2, 3) + '\n' +
+      arg(' ', 3, userWithAddress)
     )
   })
 
@@ -354,10 +361,10 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.save', ['tenant-1', true, nestedConfigWithChanges])).toThrow(
       'mod.save() was called with wrong arguments\n\n' +
-      '  arg 0: "tenant-1"\n' +
-      '  arg 1: true\n' +
-      '- arg 2: ' + sorted(nestedConfig) + '\n' +
-      '+ arg 2: ' + sorted(nestedConfigWithChanges)
+      arg(' ', 0, 'tenant-1') + '\n' +
+      arg(' ', 1, true) + '\n' +
+      arg('-', 2, nestedConfig) + '\n' +
+      arg('+', 2, nestedConfigWithChanges)
     )
   })
 
@@ -370,8 +377,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ m: 'world', z: 1, a: 2 }])).toThrow(
       'mod.fn() was called with wrong arguments\n\n' +
-      '- arg 0: {\n  "a": 2,\n  "m": "hello",\n  "z": 1\n}\n' +
-      '+ arg 0: {\n  "a": 2,\n  "m": "world",\n  "z": 1\n}'
+      arg('-', 0, { z: 1, a: 2, m: 'hello' }) + '\n' +
+      arg('+', 0, { m: 'world', z: 1, a: 2 })
     )
   })
 })
