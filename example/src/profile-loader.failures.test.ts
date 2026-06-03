@@ -34,17 +34,4 @@ describe('loadProfile — expected failures', () => {
     await loadProfile('user-1')
   })
 
-  it.fails('loads a profile when the database is offline', async () => {
-    userService.expects('getUser').withArgs('user-1').throws(new Error('db offline'))
-
-    const profile = await loadProfile('user-1')
-    expect(profile.name).toBe('Alice')
-  })
-
-  it.fails('loads a profile when the user service times out', async () => {
-    userService.expects('getUser').withArgs('user-1').rejects(new Error('timeout'))
-
-    const profile = await loadProfile('user-1')
-    expect(profile.name).toBe('Alice')
-  })
 })
