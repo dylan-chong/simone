@@ -1,4 +1,6 @@
-export async function getUser(id: string): Promise<{ id: string; name: string }> {
+import type { User } from './types'
+
+export async function getUser(id: string): Promise<User> {
   throw new Error('real implementation — hits database')
 }
 
