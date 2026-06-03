@@ -14,3 +14,7 @@ export interface Expectation<F> {
 export interface ExpectationWithArgs<F> {
   returns(value: F extends (...a: any[]) => infer R ? R : never): void
 }
+
+export type MockModuleInstance<T> = MockedModule<T> & {
+  [K in FunctionKeys<T>]: T[K]
+}

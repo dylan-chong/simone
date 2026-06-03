@@ -1,11 +1,8 @@
 import { globalQueue } from './expectation'
 import { registry, type Resettable } from './registry'
-import type { MockedModule, Expectation, ExpectationWithArgs } from './types'
+import type { MockModuleInstance, Expectation, ExpectationWithArgs } from './types'
 
-interface MockModuleInternal<T> extends MockedModule<T>, Resettable {
-  reset(): void
-  [key: string]: unknown
-}
+type MockModuleInternal<T> = MockModuleInstance<T> & Resettable
 
 export function createMockModule<T>(moduleName: string, functionNames: string[]): MockModuleInternal<T> {
   const neverFns = new Set<string>()
