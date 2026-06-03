@@ -1,9 +1,9 @@
-import type { EmailPreferences, SendEmailResult } from './types'
+import type { EmailPreferences, EmailQuery, SendEmailRequest, SendEmailResult } from './types'
 
-export async function sendWelcomeEmail(userId: string, email: string): Promise<SendEmailResult> {
+export async function sendWelcomeEmail(request: SendEmailRequest): Promise<SendEmailResult> {
   throw new Error('real implementation — hits SMTP server')
 }
 
-export async function getEmailPreferences(userId: string): Promise<EmailPreferences> {
+export async function getEmailPreferences(query: EmailQuery): Promise<EmailPreferences> {
   throw new Error('real implementation — hits database')
 }

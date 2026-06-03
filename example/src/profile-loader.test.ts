@@ -7,14 +7,10 @@ const emailService = mockModule<typeof import('./email-service')>('./email-servi
 
 describe('loadProfile', () => {
   it('includes user name and email preferences in the profile', async () => {
-    userService.expects('getUser').withArgs('user-1').returns(
-      Promise.resolve({ id: 'user-1', name: 'Alice' })
-    )
-    emailService.expects('getEmailPreferences').withArgs('user-1').returns(
-      Promise.resolve({ marketing: true, notifications: false })
-    )
+    userService.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
+    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: 'web' }).resolves({ marketing: true, notifications: false })
 
-    expect(await loadProfile('user-1')).toEqual({
+    expect(await loadProfile('user-1', 'web')).toEqual({
       id: 'user-1',
       name: 'Alice',
       emailPrefs: { marketing: true, notifications: false },
@@ -23,14 +19,14 @@ describe('loadProfile', () => {
   })
 
   it('derives user name from the user id', async () => {
-    userService.expects('getUser').withArgs('user-1').calls(
-      async (id) => ({ id, name: `User-${id}` })
+    userService.expects('getUser').withArgs({ id: 'user-1' }).calls(
+      async (query) => ({ id: query.id, name: `User-${query.id}` })
     )
-    emailService.expects('getEmailPreferences').withArgs('user-1').calls(
+    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: 'mobile' }).calls(
       async () => ({ marketing: false, notifications: true })
     )
 
-    expect(await loadProfile('user-1')).toEqual({
+    expect(await loadProfile('user-1', 'mobile')).toEqual({
       id: 'user-1',
       name: 'User-user-1',
       emailPrefs: { marketing: false, notifications: true },
@@ -39,10 +35,10 @@ describe('loadProfile', () => {
   })
 
   it('loads profile with marketing opted in', async () => {
-    userService.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
-    emailService.expects('getEmailPreferences').withArgs('user-1').resolves({ marketing: true, notifications: false })
+    userService.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
+    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: 'web' }).resolves({ marketing: true, notifications: false })
 
-    expect(await loadProfile('user-1')).toEqual({
+    expect(await loadProfile('user-1', 'web')).toEqual({
       id: 'user-1',
       name: 'Alice',
       emailPrefs: { marketing: true, notifications: false },
@@ -51,30 +47,30 @@ describe('loadProfile', () => {
   })
 
   it('fails when the database is offline', async () => {
-    userService.expects('getUser').withArgs('user-1').throws(new Error('db offline'))
+    userService.expects('getUser').withArgs({ id: 'user-1' }).throws(new Error('db offline'))
 
-    await expect(loadProfile('user-1')).rejects.toThrow('db offline')
+    await expect(loadProfile('user-1', 'web')).rejects.toThrow('db offline')
   })
 
   it('fails when the user service times out', async () => {
-    userService.expects('getUser').withArgs('user-1').rejects(new Error('timeout'))
+    userService.expects('getUser').withArgs({ id: 'user-1' }).rejects(new Error('timeout'))
 
-    await expect(loadProfile('user-1')).rejects.toThrow('timeout')
+    await expect(loadProfile('user-1', 'web')).rejects.toThrow('timeout')
   })
 
   it('loads profiles for multiple users sequentially', async () => {
-    userService.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
-    emailService.expects('getEmailPreferences').withArgs('user-1').resolves({ marketing: true, notifications: true })
-    userService.expects('getUser').withArgs('user-2').resolves({ id: 'user-2', name: 'Bob' })
-    emailService.expects('getEmailPreferences').withArgs('user-2').resolves({ marketing: false, notifications: true })
+    userService.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
+    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: 'web' }).resolves({ marketing: true, notifications: true })
+    userService.expects('getUser').withArgs({ id: 'user-2' }).resolves({ id: 'user-2', name: 'Bob' })
+    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-2', channel: 'web' }).resolves({ marketing: false, notifications: true })
 
-    expect(await loadProfile('user-1')).toEqual({
+    expect(await loadProfile('user-1', 'web')).toEqual({
       id: 'user-1',
       name: 'Alice',
       emailPrefs: { marketing: true, notifications: true },
       loadedAt: expect.any(Number),
     })
-    expect(await loadProfile('user-2')).toEqual({
+    expect(await loadProfile('user-2', 'web')).toEqual({
       id: 'user-2',
       name: 'Bob',
       emailPrefs: { marketing: false, notifications: true },

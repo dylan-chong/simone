@@ -7,8 +7,8 @@ export interface Profile extends User {
   loadedAt: number
 }
 
-export async function loadProfile(id: string): Promise<Profile> {
-  const user = await getUser(id)
-  const prefs = await getEmailPreferences(id)
+export async function loadProfile(id: string, channel: 'web' | 'mobile'): Promise<Profile> {
+  const user = await getUser({ id })
+  const prefs = await getEmailPreferences({ userId: id, channel })
   return { ...user, emailPrefs: prefs, loadedAt: Date.now() }
 }
