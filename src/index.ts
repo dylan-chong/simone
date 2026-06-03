@@ -4,6 +4,7 @@ import { registry } from './registry'
 import type { MockModuleInstance } from './types'
 
 export type { MockedModule, MockModuleInstance, Expectation, ExpectationWithArgs, FunctionKeys } from './types'
+export { SimoneError, SimoneAlreadyFailedError } from './errors'
 
 export function mockModule<Module>(path: string): MockModuleInstance<Module> {
   const moduleName = path.replace(/^.*\//, '').replace(/\.\w+$/, '')

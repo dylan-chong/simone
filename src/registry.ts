@@ -1,4 +1,5 @@
 import { globalQueue } from './expectation'
+import { SimoneError, SimoneAlreadyFailedError } from './errors'
 
 export interface Resettable {
   reset(): void
@@ -17,14 +18,14 @@ class Registry {
 
   verifyAll(): void {
     if (globalQueue.hasArgMismatch()) {
-      throw new Error('simone: expectation was called with incorrect args. Search for previous error.')
+      throw new SimoneAlreadyFailedError()
     }
     const unconsumed = globalQueue.getUnconsumed()
     if (unconsumed.length > 0) {
       const details = unconsumed
         .map((e) => `  - ${e.fnName}(${e.args.map((a) => JSON.stringify(a)).join(', ')})`)
         .join('\n')
-      throw new Error(`simone: the following was expected but never called:\n${details}`)
+      throw new SimoneError(`the following was expected but never called:\n${details}`)
     }
   }
 

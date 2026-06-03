@@ -1,3 +1,5 @@
+import { SimoneError } from './errors'
+
 export enum ResponseType {
   return = 'return',
   throw = 'throw',
@@ -28,21 +30,21 @@ class GlobalExpectationQueue {
 
   consume(fnName: string, calledArgs: unknown[]): unknown {
     if (this.consumedCount >= this.queue.length) {
-      throw new Error(
-        `simone: ${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`
+      throw new SimoneError(
+        `${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`
       )
     }
 
     const next = this.queue[this.consumedCount]
     if (next.fnName !== fnName) {
-      throw new Error(
-        `simone: expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
+      throw new SimoneError(
+        `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
       )
     }
     if (!deepEqual(next.args, calledArgs)) {
       this.hadArgMismatch = true
-      throw new Error(
-        `simone: ${fnName}() was called with wrong arguments\n\n` +
+      throw new SimoneError(
+        `${fnName}() was called with wrong arguments\n\n` +
         formatArgsDiff(next.args, calledArgs)
       )
     }

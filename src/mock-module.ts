@@ -1,4 +1,5 @@
 import { globalQueue, ResponseType } from './expectation'
+import { SimoneError } from './errors'
 import { registry, type Resettable } from './registry'
 import type { MockModuleInstance, ExpectationWithArgs } from './types'
 
@@ -10,7 +11,7 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
   const mod: MockModuleInternal<Module> = {
     expects(name: string): any {
       if (!functionNames.includes(name)) {
-        throw new Error(`simone: '${name}' is not a function export`)
+        throw new SimoneError(`'${name}' is not a function export`)
       }
 
       return {
@@ -46,7 +47,7 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
   for (const name of functionNames) {
     (mod as any)[name] = (...args: unknown[]) => {
       if (!configuredFns.has(name)) {
-        throw new Error(`simone: ${moduleName}.${name}() was called but has no expectations configured`)
+        throw new SimoneError(`${moduleName}.${name}() was called but has no expectations configured`)
       }
       return globalQueue.consume(`${moduleName}.${name}`, args)
     }

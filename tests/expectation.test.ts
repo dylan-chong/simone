@@ -27,14 +27,14 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.sendEmail', args: ['user-1'], response: { type: ResponseType.return, value: undefined } })
 
     expect(() => globalQueue.consume('mod.sendEmail', ['user-1'])).toThrow(
-      'simone: expected mod.getUser("user-1") to be called next, but mod.sendEmail("user-1") was called'
+      'expected mod.getUser("user-1") to be called next, but mod.sendEmail("user-1") was called'
     )
   })
 
   it('enforces ordering — throws if right fn but wrong args', () => {
     globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.return, value: 'Alice' } })
 
-    expect(() => globalQueue.consume('mod.getUser', ['user-2'])).toThrow(`simone: mod.getUser() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.getUser', ['user-2'])).toThrow(`mod.getUser() was called with wrong arguments
 
 - arg 0: "user-1"
 + arg 0: "user-2"`)
@@ -50,7 +50,7 @@ describe('globalQueue', () => {
 
   it('throws when queue is empty', () => {
     expect(() => globalQueue.consume('mod.getUser', ['user-1'])).toThrow(
-      'simone: mod.getUser("user-1") was called but no expectations remain'
+      'mod.getUser("user-1") was called but no expectations remain'
     )
   })
 
@@ -63,7 +63,7 @@ describe('globalQueue', () => {
   it('rejects structurally different objects', () => {
     globalQueue.add({ fnName: 'mod.create', args: [{ name: 'Alice', age: 30 }], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow(`simone: mod.create() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow(`mod.create() was called with wrong arguments
 
 - arg 0: {
            "age": 30,
@@ -84,7 +84,7 @@ describe('globalQueue', () => {
   it('rejects nested objects with different values', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow(`simone: mod.fn() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow(`mod.fn() was called with wrong arguments
 
 - arg 0: {
            "a": {
@@ -111,7 +111,7 @@ describe('globalQueue', () => {
   it('rejects arrays with different length', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow(`simone: mod.fn() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow(`mod.fn() was called with wrong arguments
 
 - arg 0: [
            1,
@@ -127,7 +127,7 @@ describe('globalQueue', () => {
   it('rejects arrays with different values', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow(`simone: mod.fn() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow(`mod.fn() was called with wrong arguments
 
 - arg 0: [
            1,
@@ -144,7 +144,7 @@ describe('globalQueue', () => {
   it('distinguishes null from objects', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [null], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{}])).toThrow(`simone: mod.fn() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.fn', [{}])).toThrow(`mod.fn() was called with wrong arguments
 
 - arg 0: null
 + arg 0: {}`)
@@ -153,7 +153,7 @@ describe('globalQueue', () => {
   it('distinguishes arrays from objects', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2]], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow(`simone: mod.fn() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow(`mod.fn() was called with wrong arguments
 
 - arg 0: [
            1,
@@ -174,7 +174,7 @@ describe('globalQueue', () => {
   it('rejects objects with extra keys', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1 }], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow(`simone: mod.fn() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow(`mod.fn() was called with wrong arguments
 
 - arg 0: {
            "a": 1
@@ -188,7 +188,7 @@ describe('globalQueue', () => {
   it('rejects objects with missing keys', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1, b: 2 }], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow(`simone: mod.fn() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow(`mod.fn() was called with wrong arguments
 
 - arg 0: {
            "a": 1,
@@ -234,7 +234,7 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.throw, error: new Error('fail') } })
 
     expect(() => globalQueue.consume('mod.getUser', ['user-2'])).toThrow(
-      'simone: mod.getUser() was called with wrong arguments'
+      'mod.getUser() was called with wrong arguments'
     )
   })
 
@@ -248,7 +248,7 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.reject, error: new Error('denied') } })
 
     expect(() => globalQueue.consume('mod.getUser', ['user-2'])).toThrow(
-      'simone: mod.getUser() was called with wrong arguments'
+      'mod.getUser() was called with wrong arguments'
     )
   })
 
@@ -271,7 +271,7 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.fn', args: ['x'], response: { type: ResponseType.callback, fn: () => { called = true; return 'ok' } } })
 
     expect(() => globalQueue.consume('mod.fn', ['y'])).toThrow(
-      'simone: mod.fn() was called with wrong arguments'
+      'mod.fn() was called with wrong arguments'
     )
     expect(called).toBe(false)
   })
@@ -288,7 +288,7 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.placeOrder', args: [orderWithItems], response: { type: ResponseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.placeOrder', [orderWithDifferentItems])).toThrow(
-      'simone: mod.placeOrder() was called with wrong arguments'
+      'mod.placeOrder() was called with wrong arguments'
     )
   })
 
@@ -304,7 +304,7 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.configure', args: [nestedConfig], response: { type: ResponseType.return, value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.configure', [nestedConfigWithChanges])).toThrow(
-      'simone: mod.configure() was called with wrong arguments'
+      'mod.configure() was called with wrong arguments'
     )
   })
 
@@ -319,7 +319,7 @@ describe('globalQueue', () => {
 
     globalQueue.add({ fnName: 'mod.updateUser', args: ['user-1', userWithAddress], response: { type: ResponseType.return, value: 'ok' } })
 
-    expect(() => globalQueue.consume('mod.updateUser', ['user-1', userWithDifferentAddress])).toThrow(`simone: mod.updateUser() was called with wrong arguments
+    expect(() => globalQueue.consume('mod.updateUser', ['user-1', userWithDifferentAddress])).toThrow(`mod.updateUser() was called with wrong arguments
 
   arg 0: "user-1"
 - arg 1: {
@@ -372,7 +372,7 @@ describe('globalQueue', () => {
     })
 
     expect(() => globalQueue.consume('mod.processOrder', ['shop-1', orderWithDifferentItems, true, userWithAddress, 42])).toThrow(
-      `simone: mod.processOrder() was called with wrong arguments
+      `mod.processOrder() was called with wrong arguments
 
   arg 0: "shop-1"
 - arg 1: {
@@ -454,7 +454,7 @@ describe('globalQueue', () => {
     })
 
     expect(() => globalQueue.consume('mod.sync', [nestedConfig, 'staging', 3, userWithAddress])).toThrow(
-      `simone: mod.sync() was called with wrong arguments
+      `mod.sync() was called with wrong arguments
 
   arg 0: {
            "database": {
@@ -505,7 +505,7 @@ describe('globalQueue', () => {
     })
 
     expect(() => globalQueue.consume('mod.save', ['tenant-1', true, nestedConfigWithChanges])).toThrow(
-      `simone: mod.save() was called with wrong arguments
+      `mod.save() was called with wrong arguments
 
   arg 0: "tenant-1"
   arg 1: true
@@ -559,7 +559,7 @@ describe('globalQueue', () => {
     })
 
     expect(() => globalQueue.consume('mod.fn', [{ m: 'world', z: 1, a: 2 }])).toThrow(
-      `simone: mod.fn() was called with wrong arguments
+      `mod.fn() was called with wrong arguments
 
 - arg 0: {
            "a": 2,
