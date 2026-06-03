@@ -3,6 +3,11 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-06-03
+### Added
+- 100% code coverage enforcement for both main project and example
+- `coverage` directory added to `.gitignore`
+
 ## [1.4.1] - 2026-06-03
 ### Fixed
 - Test script now runs `tsc --noEmit` on both projects to catch source type errors (vitest `--typecheck` only checks test files)

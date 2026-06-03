@@ -36,7 +36,18 @@ describe('registry', () => {
     expect(() => registry.verifyAll()).not.toThrow()
   })
 
+  it('verifyAll throws SimoneAlreadyFailedError when queue has failed', () => {
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.return, value: 'x' } })
+    try {
+      globalQueue.consume('mod.getUser', ['wrong-arg'])
+    } catch {}
+
+    expect(() => registry.verifyAll()).toThrow('A previous expectation already failed in this test')
+  })
+
   it('resetAll clears the globalQueue and resets registered modules', () => {
+    const mod = { reset: () => {} }
+    registry.register(mod)
     globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.return, value: 'x' } })
     registry.resetAll()
 

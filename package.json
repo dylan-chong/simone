@@ -1,6 +1,6 @@
 {
   "name": "simone",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "type": "module",
   "exports": {
     ".": {
@@ -14,8 +14,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "tsc --noEmit && tsc --noEmit -p example/tsconfig.json && vitest --typecheck --run && vitest --typecheck --run --config example/vitest.config.ts",
-    "test:example": "vitest run --config example/vitest.config.ts",
+    "test": "tsc --noEmit && tsc --noEmit -p example/tsconfig.json && vitest --typecheck --run --coverage && vitest --typecheck --run --coverage --config example/vitest.config.ts",
+    "test:example": "vitest run --coverage --config example/vitest.config.ts",
     "test:watch": "vitest"
   },
   "keywords": [],
@@ -24,6 +24,7 @@
   "description": "",
   "devDependencies": {
     "@types/node": "25.9.1",
+    "@vitest/coverage-v8": "4.1.8",
     "typescript": "6.0.3",
     "vitest": "4.1.8"
   }

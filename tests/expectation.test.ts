@@ -308,6 +308,24 @@ describe('globalQueue', () => {
     )
   })
 
+  it('shows missing arg when called with fewer args than expected', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: ['a', 'b'], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', ['a'])).toThrow(`mod.fn() was called with wrong arguments
+
+  arg 0: "a"
+- arg 1: "b"`)
+  })
+
+  it('shows extra arg when called with more args than expected', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: ['a'], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', ['a', 'b'])).toThrow(`mod.fn() was called with wrong arguments
+
+  arg 0: "a"
++ arg 1: "b"`)
+  })
+
   it('matches user object with nested address', () => {
 
     globalQueue.add({ fnName: 'mod.updateUser', args: ['user-1', userWithAddress], response: { type: ResponseType.return, value: 'ok' } })
