@@ -3,6 +3,17 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-03
+### Added
+- `.expects(name).withArgs(...).throws(error)` — stub throws synchronously
+- `.expects(name).withArgs(...).resolves(value)` — shorthand for returning a resolved promise
+- `.expects(name).withArgs(...).rejects(error)` — shorthand for returning a rejected promise
+- "Adding a New Function" guide in README
+
+### Changed
+- Example project uses domain-specific test names and single deep-object assertions
+- Example project extracts all inline types to `example/src/types.ts`
+
 ## [1.1.0] - 2026-06-03
 ### Added
 - `.expects(name).withArgs(...).calls(fn)` for dynamic return values via callback

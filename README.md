@@ -38,15 +38,6 @@ it('loads a user profile', async () => {
   const profile = await loadProfile('user-1')
   expect(profile.name).toBe('Alice')
 })
-
-it('uses a callback for dynamic return values', async () => {
-  userService.expects('getUser').withArgs('user-1').calls(
-    async (id) => ({ id, name: `User-${id}` })
-  )
-
-  const profile = await loadProfile('user-1')
-  expect(profile.name).toBe('User-user-1')
-})
 ```
 
 See the [`example/`](./example) directory for complete working examples:
@@ -97,4 +88,15 @@ Invokes `fn` with the matched args to compute the return value. `fn` must match 
 3. Commit: `git commit -am "chore: release vX.Y.Z"`
 4. Tag: `git tag vX.Y.Z`
 5. Push: `git push && git push --tags`
+
+## Adding a New Function to the API
+
+1. Add the type signature to `src/types.ts`
+2. Implement in `src/mock-module.ts` (and `src/expectation.ts` if queue behaviour changes)
+3. Add type tests to `tests/types.test-d.ts`
+4. Add runtime tests to `tests/mock-module.test.ts`
+5. Add a passing example test to `example/src/profile-loader.test.ts`
+6. Add an expected-failure test to `example/src/profile-loader.failures.test.ts`
+7. Document in the API section of this README
+8. Run `npm test` to verify all tests, type checks, and examples pass
 
