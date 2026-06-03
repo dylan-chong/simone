@@ -14,11 +14,12 @@ describe('loadProfile', () => {
       Promise.resolve({ marketing: true, notifications: false })
     )
 
-    const profile = await loadProfile('user-1')
-
-    expect(profile.name).toBe('Alice')
-    expect(profile.emailPrefs).toEqual({ marketing: true, notifications: false })
-    expect(profile.loadedAt).toBeTypeOf('number')
+    expect(await loadProfile('user-1')).toEqual({
+      id: 'user-1',
+      name: 'Alice',
+      emailPrefs: { marketing: true, notifications: false },
+      loadedAt: expect.any(Number),
+    })
   })
 
   it('derives user name from the user id', async () => {
@@ -29,20 +30,24 @@ describe('loadProfile', () => {
       async () => ({ marketing: false, notifications: true })
     )
 
-    const profile = await loadProfile('user-1')
-
-    expect(profile.name).toBe('User-user-1')
-    expect(profile.emailPrefs).toEqual({ marketing: false, notifications: true })
+    expect(await loadProfile('user-1')).toEqual({
+      id: 'user-1',
+      name: 'User-user-1',
+      emailPrefs: { marketing: false, notifications: true },
+      loadedAt: expect.any(Number),
+    })
   })
 
   it('loads profile with marketing opted in', async () => {
     userService.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
     emailService.expects('getEmailPreferences').withArgs('user-1').resolves({ marketing: true, notifications: false })
 
-    const profile = await loadProfile('user-1')
-
-    expect(profile.name).toBe('Alice')
-    expect(profile.emailPrefs).toEqual({ marketing: true, notifications: false })
+    expect(await loadProfile('user-1')).toEqual({
+      id: 'user-1',
+      name: 'Alice',
+      emailPrefs: { marketing: true, notifications: false },
+      loadedAt: expect.any(Number),
+    })
   })
 
   it('fails when the database is offline', async () => {
@@ -58,25 +63,22 @@ describe('loadProfile', () => {
   })
 
   it('loads profiles for multiple users sequentially', async () => {
-    userService.expects('getUser').withArgs('user-1').returns(
-      Promise.resolve({ id: 'user-1', name: 'Alice' })
-    )
-    emailService.expects('getEmailPreferences').withArgs('user-1').returns(
-      Promise.resolve({ marketing: true, notifications: true })
-    )
-    userService.expects('getUser').withArgs('user-2').returns(
-      Promise.resolve({ id: 'user-2', name: 'Bob' })
-    )
-    emailService.expects('getEmailPreferences').withArgs('user-2').returns(
-      Promise.resolve({ marketing: false, notifications: true })
-    )
+    userService.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
+    emailService.expects('getEmailPreferences').withArgs('user-1').resolves({ marketing: true, notifications: true })
+    userService.expects('getUser').withArgs('user-2').resolves({ id: 'user-2', name: 'Bob' })
+    emailService.expects('getEmailPreferences').withArgs('user-2').resolves({ marketing: false, notifications: true })
 
-    const alice = await loadProfile('user-1')
-    const bob = await loadProfile('user-2')
-
-    expect(alice.name).toBe('Alice')
-    expect(bob.name).toBe('Bob')
-    expect(bob.emailPrefs.marketing).toBe(false)
+    expect(await loadProfile('user-1')).toEqual({
+      id: 'user-1',
+      name: 'Alice',
+      emailPrefs: { marketing: true, notifications: true },
+      loadedAt: expect.any(Number),
+    })
+    expect(await loadProfile('user-2')).toEqual({
+      id: 'user-2',
+      name: 'Bob',
+      emailPrefs: { marketing: false, notifications: true },
+      loadedAt: expect.any(Number),
+    })
   })
-
 })
