@@ -27,8 +27,7 @@ export function simonePlugin(): Plugin {
       let transformed = code
       const mocks: { varName: string; path: string }[] = []
 
-      let match: RegExpExecArray | null
-      while ((match = mockModuleRegex.exec(code)) !== null) {
+      for (const match of code.matchAll(mockModuleRegex)) {
         mocks.push({ varName: match[1], path: match[2] })
       }
 
@@ -76,16 +75,13 @@ function analyzeModuleExports(modulePath: string, importerId: string): string[] 
   const source = readFileSync(filePath, 'utf-8')
   const names: string[] = []
 
-  // Match: export function name(...) or export async function name(...)
   const functionExportRegex = /export\s+(?:async\s+)?function\s+(\w+)/g
-  let m: RegExpExecArray | null
-  while ((m = functionExportRegex.exec(source)) !== null) {
+  for (const m of source.matchAll(functionExportRegex)) {
     names.push(m[1])
   }
 
-  // Match: export const fn = (...) => ... or export const fn = async (...) => ...
   const arrowExportRegex = /export\s+const\s+(\w+)\s*=\s*(?:async\s*)?\(/g
-  while ((m = arrowExportRegex.exec(source)) !== null) {
+  for (const m of source.matchAll(arrowExportRegex)) {
     names.push(m[1])
   }
 
