@@ -2,6 +2,8 @@
 
 Typed mock expectations for Vitest. Sinon-style API with full TypeScript inference.
 
+Opinionated towards a semi-functional style where you mock exported functions on a module. OOP-style mocks (classes, instances, method stubs) are not supported.
+
 ## Install
 
 ```bash
@@ -21,6 +23,22 @@ export default defineConfig({
 ```
 
 ## Usage
+
+```ts
+import { mockModule } from 'simone'
+import { loadProfile } from './profile-loader'
+
+const userService = mockModule<typeof import('./user-service')>('./user-service')
+
+it('loads a user profile', async () => {
+  userService.expects('getUser').withArgs('user-1').returns(
+    Promise.resolve({ id: 'user-1', name: 'Alice' })
+  )
+
+  const profile = await loadProfile('user-1')
+  expect(profile.name).toBe('Alice')
+})
+```
 
 See the [`example/`](./example) directory for complete working examples:
 
