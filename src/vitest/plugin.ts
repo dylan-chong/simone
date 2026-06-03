@@ -28,41 +28,51 @@ export function simonePlugin(): Plugin {
 
       if (mocks.length === 0) return null
 
-      const transformed = mocks
-        .reduce((acc, { varName, path }) => {
-          const original = new RegExp(
-            `const\\s+${varName}\\s*=\\s*mockModule\\s*<[^>]*>\\s*\\(\\s*['"]${escapeRegex(path)}['"]\\s*\\)`
-          )
-          const exportNames = analyzeModuleExports(path, id)
-          return acc.replace(
-            original,
-            `const ${varName} = await vi.hoisted(async () => {\n` +
-            `  const { createMockModule } = await import('${mockModulePath}');\n` +
-            `  return createMockModule('${path}', ${JSON.stringify(exportNames)});\n` +
-            `});\n` +
-            `vi.mock('${path}', () => ${varName});`
-          )
-        }, code)
-        .replace(/import\s*\{[^}]*\bmockModule\b[^}]*\}\s*from\s*['"][^'"]+['"]\s*;?\n?/g, '')
+      const transformed = stripMockModuleImport(
+        replaceMockModuleCalls(code, mocks, id, mockModulePath)
+      )
 
       return { code: transformed, map: null }
     },
   }
 }
 
+function replaceMockModuleCalls(code: string, mocks: { varName: string; path: string }[], importerId: string, mockModulePath: string): string {
+  return mocks.reduce((acc, { varName, path }) => {
+    const original = new RegExp(
+      `const\\s+${varName}\\s*=\\s*mockModule\\s*<[^>]*>\\s*\\(\\s*['"]${escapeRegex(path)}['"]\\s*\\)`
+    )
+    const exportNames = analyzeModuleExports(path, importerId)
+    return acc.replace(
+      original,
+      `const ${varName} = await vi.hoisted(async () => {\n` +
+      `  const { createMockModule } = await import('${mockModulePath}');\n` +
+      `  return createMockModule('${path}', ${JSON.stringify(exportNames)});\n` +
+      `});\n` +
+      `vi.mock('${path}', () => ${varName});`
+    )
+  }, code)
+}
+
+function stripMockModuleImport(code: string): string {
+  return code.replace(/import\s*\{[^}]*\bmockModule\b[^}]*\}\s*from\s*['"][^'"]+['"]\s*;?\n?/g, '')
+}
+
+function resolveModulePath(basePath: string): string | null {
+  const extensions = ['.ts', '.tsx', '.js', '.jsx']
+  for (const ext of extensions) {
+    const candidate = basePath.endsWith(ext) ? basePath : basePath + ext
+    if (existsSync(candidate)) {
+      return candidate
+    }
+  }
+  return null
+}
+
 function analyzeModuleExports(modulePath: string, importerId: string): string[] {
   const dir = dirname(importerId)
   const resolved = resolve(dir, modulePath)
-  const extensions = ['.ts', '.tsx', '.js', '.jsx']
-
-  let filePath: string | null = null
-  for (const ext of extensions) {
-    const candidate = resolved.endsWith(ext) ? resolved : resolved + ext
-    if (existsSync(candidate)) {
-      filePath = candidate
-      break
-    }
-  }
+  const filePath = resolveModulePath(resolved)
 
   if (!filePath) return []
 
