@@ -334,4 +334,18 @@ describe('globalQueue', () => {
       '+ arg 2: ' + sorted(nestedConfigWithChanges)
     )
   })
+
+  it('diff normalizes key order so only value differences are visible', () => {
+    globalQueue.add({
+      fnName: 'mod.fn',
+      args: [{ z: 1, a: 2, m: 'hello' }],
+      response: { type: ResponseType.return, value: 'ok' },
+    })
+
+    expect(() => globalQueue.consume('mod.fn', [{ m: 'world', z: 1, a: 2 }])).toThrow(
+      'mod.fn() was called with wrong arguments\n\n' +
+      '- arg 0: {\n  "a": 2,\n  "m": "hello",\n  "z": 1\n}\n' +
+      '+ arg 0: {\n  "a": 2,\n  "m": "world",\n  "z": 1\n}'
+    )
+  })
 })
