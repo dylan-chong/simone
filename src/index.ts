@@ -1,4 +1,3 @@
-// src/index.ts
 import { createMockModule } from './mock-module'
 import { registry } from './registry'
 import type { MockModuleInstance } from './types'
