@@ -17,8 +17,8 @@ describe('integration: mockModule with global ordering', () => {
     mathService.expects('add').withArgs(1, 2).returns(3)
     mathService.expects('multiply').withArgs(2, 3).returns(6)
 
-    expect((mathService as any).add(1, 2)).toBe(3)
-    expect((mathService as any).multiply(2, 3)).toBe(6)
+    expect(mathService.add(1, 2)).toBe(3)
+    expect(mathService.multiply(2, 3)).toBe(6)
 
     registry.verifyAll()
   })
@@ -34,7 +34,7 @@ describe('integration: mockModule with global ordering', () => {
   it('throws on unmocked function call', () => {
     const mathService = createMockModule<MathService>('mathService', ['add', 'multiply'])
 
-    expect(() => (mathService as any).add(1, 2)).toThrow(
+    expect(() => mathService.add(1, 2)).toThrow(
       'has no expectations configured'
     )
   })
@@ -43,7 +43,7 @@ describe('integration: mockModule with global ordering', () => {
     const mathService = createMockModule<MathService>('mathService', ['add', 'multiply'])
     mathService.expects('multiply').never()
 
-    expect(() => (mathService as any).multiply(2, 3)).toThrow(
+    expect(() => mathService.multiply(2, 3)).toThrow(
       'is expected to never be called'
     )
   })
@@ -56,7 +56,7 @@ describe('integration: mockModule with global ordering', () => {
     otherService.expects('doThing').withArgs().returns('done')
 
     // Calling otherService before mathService violates global order
-    expect(() => (otherService as any).doThing()).toThrow(
+    expect(() => otherService.doThing()).toThrow(
       'expected mathService.add(1, 2) to be called next'
     )
   })
@@ -66,8 +66,8 @@ describe('integration: mockModule with global ordering', () => {
     mathService.expects('add').withArgs(1, 1).returns(10)
     mathService.expects('add').withArgs(1, 1).returns(20)
 
-    expect((mathService as any).add(1, 1)).toBe(10)
-    expect((mathService as any).add(1, 1)).toBe(20)
+    expect(mathService.add(1, 1)).toBe(10)
+    expect(mathService.add(1, 1)).toBe(20)
 
     registry.verifyAll()
   })

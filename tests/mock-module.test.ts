@@ -30,7 +30,7 @@ describe('createMockModule', () => {
   it('stub throws when called without any expectation configured', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
 
-    expect(() => (mod as any).getUser('user-1')).toThrow(
+    expect(() => mod.getUser('user-1')).toThrow(
       'getUser() was called but has no expectations configured'
     )
   })
@@ -39,7 +39,7 @@ describe('createMockModule', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
 
-    const result = (mod as any).getUser('user-1')
+    const result = mod.getUser('user-1')
     expect(result).resolves.toEqual({ id: 'user-1', name: 'Alice' })
   })
 
@@ -47,7 +47,7 @@ describe('createMockModule', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
 
-    expect(() => (mod as any).getUser('wrong-id')).toThrow()
+    expect(() => mod.getUser('wrong-id')).toThrow()
   })
 
   it('enforces global ordering across functions', () => {
@@ -56,14 +56,14 @@ describe('createMockModule', () => {
     mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: '2' }))
 
     // Calling createUser before getUser violates order
-    expect(() => (mod as any).createUser('Bob', 25)).toThrow()
+    expect(() => mod.createUser('Bob', 25)).toThrow()
   })
 
   it('.never() causes throw when function is called', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('getUser').never()
 
-    expect(() => (mod as any).getUser('anything')).toThrow(
+    expect(() => mod.getUser('anything')).toThrow(
       'was called but is expected to never be called'
     )
   })
@@ -71,7 +71,8 @@ describe('createMockModule', () => {
   it('expects throws for non-existent function name', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
 
-    expect(() => (mod as any).expects('nonExistent')).toThrow(
+    // @ts-expect-error - testing runtime error for invalid key
+    expect(() => mod.expects('nonExistent')).toThrow(
       "'nonExistent' is not a function export"
     )
   })
@@ -82,7 +83,7 @@ describe('createMockModule', () => {
     mod.reset()
 
     // After reset, getUser is unmocked (throws "no expectations configured", not "never")
-    expect(() => (mod as any).getUser('user-1')).toThrow('has no expectations configured')
+    expect(() => mod.getUser('user-1')).toThrow('has no expectations configured')
   })
 
   it('registers itself in the global registry', () => {
