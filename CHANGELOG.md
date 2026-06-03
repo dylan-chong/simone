@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-06-03
+### Fixed
+- Test script now runs `tsc --noEmit` on both projects to catch source type errors (vitest `--typecheck` only checks test files)
+
 ## [1.4.0] - 2026-06-03
 ### Added
 - `SimoneError` class for all simone errors
