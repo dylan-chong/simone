@@ -3,6 +3,11 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-06-04
+### Changed
+- Convention: all `mockModule` variables now use `Mock` suffix (e.g. `userServiceMock`)
+- Updated examples and README to follow the naming convention
+
 ## [3.0.0] - 2026-06-04
 ### Changed
 - **BREAKING** `mockModule(import('./path'))` replaces `mockModule<typeof import('./path')>('./path')` — type inference is now automatic from the dynamic import expression, no explicit generic or path duplication needed

@@ -28,10 +28,10 @@ export default defineConfig({
 import { mockModule } from 'simone'
 import { loadProfile } from './profile-loader'
 
-const userService = mockModule(import('./user-service'))
+const userServiceMock = mockModule(import('./user-service'))
 
 it('loads a user profile', async () => {
-  userService.expects('getUser').withArgs('user-1').returns(
+  userServiceMock.expects('getUser').withArgs('user-1').returns(
     Promise.resolve({ id: 'user-1', name: 'Alice' })
   )
 

@@ -3,13 +3,13 @@ import { mockModule } from '../../src/index'
 import { Channel } from './types'
 import { loadProfile } from './profile-loader'
 
-const userService = mockModule(import('./user-service'))
-const emailService = mockModule(import('./email-service'))
+const userServiceMock = mockModule(import('./user-service'))
+const emailServiceMock = mockModule(import('./email-service'))
 
 describe('loadProfile', () => {
   it('includes user name and email preferences in the profile', async () => {
-    userService.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
-    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: Channel.Web }).resolves({ marketing: true, notifications: false })
+    userServiceMock.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
+    emailServiceMock.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: Channel.Web }).resolves({ marketing: true, notifications: false })
 
     expect(await loadProfile('user-1', Channel.Web)).toEqual({
       id: 'user-1',
@@ -20,10 +20,10 @@ describe('loadProfile', () => {
   })
 
   it('derives user name from the user id', async () => {
-    userService.expects('getUser').withArgs({ id: 'user-1' }).calls(
+    userServiceMock.expects('getUser').withArgs({ id: 'user-1' }).calls(
       async (query) => ({ id: query.id, name: `User-${query.id}` })
     )
-    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: Channel.Mobile }).calls(
+    emailServiceMock.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: Channel.Mobile }).calls(
       async () => ({ marketing: false, notifications: true })
     )
 
@@ -36,8 +36,8 @@ describe('loadProfile', () => {
   })
 
   it('loads profile with marketing opted in', async () => {
-    userService.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
-    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: Channel.Web }).resolves({ marketing: true, notifications: false })
+    userServiceMock.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
+    emailServiceMock.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: Channel.Web }).resolves({ marketing: true, notifications: false })
 
     expect(await loadProfile('user-1', Channel.Web)).toEqual({
       id: 'user-1',
@@ -48,22 +48,22 @@ describe('loadProfile', () => {
   })
 
   it('fails when the database is offline', async () => {
-    userService.expects('getUser').withArgs({ id: 'user-1' }).throws(new Error('db offline'))
+    userServiceMock.expects('getUser').withArgs({ id: 'user-1' }).throws(new Error('db offline'))
 
     await expect(loadProfile('user-1', Channel.Web)).rejects.toThrow('db offline')
   })
 
   it('fails when the user service times out', async () => {
-    userService.expects('getUser').withArgs({ id: 'user-1' }).rejects(new Error('timeout'))
+    userServiceMock.expects('getUser').withArgs({ id: 'user-1' }).rejects(new Error('timeout'))
 
     await expect(loadProfile('user-1', Channel.Web)).rejects.toThrow('timeout')
   })
 
   it('loads profiles for multiple users sequentially', async () => {
-    userService.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
-    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: Channel.Web }).resolves({ marketing: true, notifications: true })
-    userService.expects('getUser').withArgs({ id: 'user-2' }).resolves({ id: 'user-2', name: 'Bob' })
-    emailService.expects('getEmailPreferences').withArgs({ userId: 'user-2', channel: Channel.Web }).resolves({ marketing: false, notifications: true })
+    userServiceMock.expects('getUser').withArgs({ id: 'user-1' }).resolves({ id: 'user-1', name: 'Alice' })
+    emailServiceMock.expects('getEmailPreferences').withArgs({ userId: 'user-1', channel: Channel.Web }).resolves({ marketing: true, notifications: true })
+    userServiceMock.expects('getUser').withArgs({ id: 'user-2' }).resolves({ id: 'user-2', name: 'Bob' })
+    emailServiceMock.expects('getEmailPreferences').withArgs({ userId: 'user-2', channel: Channel.Web }).resolves({ marketing: false, notifications: true })
 
     expect(await loadProfile('user-1', Channel.Web)).toEqual({
       id: 'user-1',
