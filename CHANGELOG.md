@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-06-04
+### Changed
+- **BREAKING** `mockModule(import('./path'))` replaces `mockModule<typeof import('./path')>('./path')` — type inference is now automatic from the dynamic import expression, no explicit generic or path duplication needed
+
 ## [2.0.0] - 2026-06-04
 ### Added
 - `ramda` as runtime dependency for robust deep equality comparison

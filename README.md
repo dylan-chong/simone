@@ -28,7 +28,7 @@ export default defineConfig({
 import { mockModule } from 'simone'
 import { loadProfile } from './profile-loader'
 
-const userService = mockModule<typeof import('./user-service')>('./user-service')
+const userService = mockModule(import('./user-service'))
 
 it('loads a user profile', async () => {
   userService.expects('getUser').withArgs('user-1').returns(
@@ -49,9 +49,9 @@ See the [`example/`](./example) directory for complete working examples:
 
 ## API
 
-### `mockModule<T>(path)`
+### `mockModule(import('./path'))`
 
-Creates a typed mock for all function exports of the module at `path`.
+Creates a typed mock for all function exports of the module. Type inference is automatic from the `import()` expression — no explicit generic needed.
 
 ### `.expects(name).withArgs(...args).returns(value)`
 

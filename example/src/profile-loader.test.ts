@@ -3,8 +3,8 @@ import { mockModule } from '../../src/index'
 import { Channel } from './types'
 import { loadProfile } from './profile-loader'
 
-const userService = mockModule<typeof import('./user-service')>('./user-service')
-const emailService = mockModule<typeof import('./email-service')>('./email-service')
+const userService = mockModule(import('./user-service'))
+const emailService = mockModule(import('./email-service'))
 
 describe('loadProfile', () => {
   it('includes user name and email preferences in the profile', async () => {

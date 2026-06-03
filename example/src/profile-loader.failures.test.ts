@@ -3,8 +3,8 @@ import { mockModule } from '../../src/index'
 import { Channel } from './types'
 import { loadProfile } from './profile-loader'
 
-const userService = mockModule<typeof import('./user-service')>('./user-service')
-const emailService = mockModule<typeof import('./email-service')>('./email-service')
+const userService = mockModule(import('./user-service'))
+const emailService = mockModule(import('./email-service'))
 
 describe('loadProfile — expected failures', () => {
   it.fails('loads email preferences before user data', async () => {
