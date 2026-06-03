@@ -56,6 +56,66 @@ describe('globalQueue', () => {
     expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow()
   })
 
+  it('matches nested objects', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: 'return', value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [{ a: { b: { c: 1 } } }])).toBe('ok')
+  })
+
+  it('rejects nested objects with different values', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: 'return', value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow()
+  })
+
+  it('matches arrays', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [[1, 2, 3]])).toBe('ok')
+  })
+
+  it('rejects arrays with different length', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow()
+  })
+
+  it('rejects arrays with different values', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow()
+  })
+
+  it('distinguishes null from objects', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [null], response: { type: 'return', value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [{}])).toThrow()
+  })
+
+  it('distinguishes arrays from objects', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [[1, 2]], response: { type: 'return', value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow()
+  })
+
+  it('matches primitives by value', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [42, 'hello', true, null, undefined], response: { type: 'return', value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [42, 'hello', true, null, undefined])).toBe('ok')
+  })
+
+  it('rejects objects with extra keys', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1 }], response: { type: 'return', value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow()
+  })
+
+  it('rejects objects with missing keys', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1, b: 2 }], response: { type: 'return', value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow()
+  })
+
   it('getUnconsumed returns remaining expectations', () => {
     globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'Alice' } })
     globalQueue.add({ fnName: 'mod.sendEmail', args: ['user-1'], response: { type: 'return', value: undefined } })
