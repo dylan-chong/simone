@@ -3,6 +3,22 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-06-03
+### Added
+- `SimoneError` class for all simone errors
+- `SimoneAlreadyFailedError` for suppressing noisy `verifyAll` errors after a prior failure
+- Per-arg diff with left-padded JSON when function called with wrong arguments
+- Object keys sorted alphabetically in diff output for readable comparison
+- Typecheck for example project tests
+- `Channel` enum in example project
+
+### Changed
+- All errors throw `SimoneError` instead of plain `Error` with `simone:` prefix
+- `verifyAll()` throws `SimoneAlreadyFailedError` for any prior failure (not just arg mismatches)
+- `setup.ts` uses `try/finally` so `resetAll()` always runs
+- Test script runs each project once (typecheck includes runtime tests)
+- Test assertions use hardcoded multiline template literals
+
 ## [1.3.0] - 2026-06-03
 ### Added
 - Integration tests for mixing `.returns()`, `.throws()`, `.calls()`, `.resolves()`, `.rejects()` across modules
