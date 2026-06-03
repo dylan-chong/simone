@@ -109,3 +109,10 @@ Declares that `name` must not be called at all.
 - Calling functions out of declaration order → throws immediately
 - Setting up an expectation that is never consumed → test fails after it completes
 - Calling `.expects()` with a name that doesn't exist on the module → compile error + runtime error
+
+## Examples
+
+See the [`example/`](./example) directory for complete working tests:
+
+- [`profile-loader.test.ts`](./example/src/profile-loader.test.ts) — mocking multiple modules with global call ordering
+- [`profile-loader.failures.test.ts`](./example/src/profile-loader.failures.test.ts) — expected failures demonstrating strict behavior
