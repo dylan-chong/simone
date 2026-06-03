@@ -15,6 +15,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
+    "test:example": "vitest run --config example/vitest.config.ts",
     "test:watch": "vitest"
   },
   "keywords": [],

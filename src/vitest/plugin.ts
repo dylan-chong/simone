@@ -4,12 +4,14 @@ import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
 export function simonePlugin(): Plugin {
+  const currentDir = dirname(fileURLToPath(import.meta.url))
+  const mockModulePath = resolve(currentDir, '../mock-module.ts')
+
   return {
     name: 'simone',
     enforce: 'pre',
 
     config() {
-      const currentDir = dirname(fileURLToPath(import.meta.url))
       return {
         test: {
           setupFiles: [resolve(currentDir, './setup.ts')],
@@ -39,9 +41,16 @@ export function simonePlugin(): Plugin {
         const exportNames = analyzeModuleExports(path, id)
         transformed = transformed.replace(
           original,
-          `const ${varName} = vi.hoisted(() => mockModule('${path}', ${JSON.stringify(exportNames)}));\nvi.mock('${path}', () => ${varName});`
+          `const ${varName} = await vi.hoisted(async () => {\n` +
+          `  const { createMockModule } = await import('${mockModulePath}');\n` +
+          `  return createMockModule('${path}', ${JSON.stringify(exportNames)});\n` +
+          `});\n` +
+          `vi.mock('${path}', () => ${varName});`
         )
       }
+
+      // Remove the user's mockModule import since we inline the real import
+      transformed = transformed.replace(/import\s*\{[^}]*\bmockModule\b[^}]*\}\s*from\s*['"][^'"]+['"]\s*;?\n?/g, '')
 
       return { code: transformed, map: null }
     },
