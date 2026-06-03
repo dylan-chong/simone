@@ -1,10 +1,13 @@
+type Response =
+  | { type: 'return'; value: unknown }
+  | { type: 'throw'; error: unknown }
+  | { type: 'reject'; error: unknown }
+  | { type: 'callback'; fn: (...args: any[]) => unknown }
+
 interface QueuedExpectation {
-  fnId: string
+  fnName: string
   args: unknown[]
-  returnValue: unknown
-  shouldThrow?: boolean
-  shouldReject?: boolean
-  callback?: (...args: any[]) => unknown
+  response: Response
 }
 
 class GlobalExpectationQueue {
@@ -15,31 +18,31 @@ class GlobalExpectationQueue {
     this.queue.push(expectation)
   }
 
-  consume(fnId: string, calledArgs: unknown[]): unknown {
+  consume(fnName: string, calledArgs: unknown[]): unknown {
     if (this.cursor >= this.queue.length) {
       throw new Error(
-        `${fnId}(${formatArgs(calledArgs)}) was called but no expectations remain`
+        `${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`
       )
     }
 
     const next = this.queue[this.cursor]
-    if (next.fnId !== fnId || !deepEqual(next.args, calledArgs)) {
+    if (next.fnName !== fnName || !deepEqual(next.args, calledArgs)) {
       throw new Error(
-        `expected ${next.fnId}(${formatArgs(next.args)}) to be called next, but ${fnId}(${formatArgs(calledArgs)}) was called`
+        `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
       )
     }
 
     this.cursor++
-    if (next.shouldThrow) {
-      throw next.returnValue
+    if (next.response.type === 'throw') {
+      throw next.response.error
     }
-    if (next.shouldReject) {
-      return Promise.reject(next.returnValue)
+    if (next.response.type === 'reject') {
+      return Promise.reject(next.response.error)
     }
-    if (next.callback) {
-      return next.callback(...calledArgs)
+    if (next.response.type === 'callback') {
+      return next.response.fn(...calledArgs)
     }
-    return next.returnValue
+    return next.response.value
   }
 
   getUnconsumed(): QueuedExpectation[] {

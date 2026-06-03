@@ -19,7 +19,7 @@ class Registry {
     const unconsumed = globalQueue.getUnconsumed()
     if (unconsumed.length > 0) {
       const details = unconsumed
-        .map((e) => `  - ${e.fnId}(${e.args.map((a) => JSON.stringify(a)).join(', ')})`)
+        .map((e) => `  - ${e.fnName}(${e.args.map((a) => JSON.stringify(a)).join(', ')})`)
         .join('\n')
       throw new Error(`simone: the following was expected but never called:\n${details}`)
     }

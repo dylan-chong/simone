@@ -16,22 +16,22 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
       return {
         withArgs(...args: unknown[]): ExpectationWithArgs<any> {
           configuredFns.add(name)
-          const fnId = `${moduleName}.${name}`
+          const fnName = `${moduleName}.${name}`
           return {
             returns(value: unknown): void {
-              globalQueue.add({ fnId, args, returnValue: value })
+              globalQueue.add({ fnName, args, response: { type: 'return', value } })
             },
             throws(error: unknown): void {
-              globalQueue.add({ fnId, args, returnValue: error, shouldThrow: true })
+              globalQueue.add({ fnName, args, response: { type: 'throw', error } })
             },
             resolves(value: unknown): void {
-              globalQueue.add({ fnId, args, returnValue: Promise.resolve(value) })
+              globalQueue.add({ fnName, args, response: { type: 'return', value: Promise.resolve(value) } })
             },
             rejects(error: unknown): void {
-              globalQueue.add({ fnId, args, returnValue: error, shouldReject: true })
+              globalQueue.add({ fnName, args, response: { type: 'reject', error } })
             },
             calls(fn: (...a: any[]) => unknown): void {
-              globalQueue.add({ fnId, args, returnValue: undefined, callback: fn })
+              globalQueue.add({ fnName, args, response: { type: 'callback', fn } })
             },
           }
         },

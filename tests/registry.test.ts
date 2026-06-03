@@ -24,20 +24,20 @@ describe('registry', () => {
   })
 
   it('verifyAll throws when globalQueue has unconsumed expectations', () => {
-    globalQueue.add({ fnId: 'mod.getUser', args: ['user-1'], returnValue: 'x' })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'x' } })
 
     expect(() => registry.verifyAll()).toThrow('was expected but never called')
   })
 
   it('verifyAll passes when globalQueue is fully consumed', () => {
-    globalQueue.add({ fnId: 'mod.getUser', args: ['user-1'], returnValue: 'x' })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'x' } })
     globalQueue.consume('mod.getUser', ['user-1'])
 
     expect(() => registry.verifyAll()).not.toThrow()
   })
 
   it('resetAll clears the globalQueue and resets registered modules', () => {
-    globalQueue.add({ fnId: 'mod.getUser', args: ['user-1'], returnValue: 'x' })
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'x' } })
     registry.resetAll()
 
     expect(globalQueue.getUnconsumed()).toHaveLength(0)
