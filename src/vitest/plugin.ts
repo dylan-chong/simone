@@ -24,32 +24,26 @@ export function simonePlugin(): Plugin {
       if (id.includes('node_modules')) return null
 
       const mockModuleRegex = /const\s+(\w+)\s*=\s*mockModule\s*<[^>]*>\s*\(\s*['"]([^'"]+)['"]\s*\)/g
-      let transformed = code
-      const mocks: { varName: string; path: string }[] = []
-
-      for (const match of code.matchAll(mockModuleRegex)) {
-        mocks.push({ varName: match[1], path: match[2] })
-      }
+      const mocks = [...code.matchAll(mockModuleRegex)].map((match) => ({ varName: match[1], path: match[2] }))
 
       if (mocks.length === 0) return null
 
-      for (const { varName, path } of mocks) {
-        const original = new RegExp(
-          `const\\s+${varName}\\s*=\\s*mockModule\\s*<[^>]*>\\s*\\(\\s*['"]${escapeRegex(path)}['"]\\s*\\)`
-        )
-        const exportNames = analyzeModuleExports(path, id)
-        transformed = transformed.replace(
-          original,
-          `const ${varName} = await vi.hoisted(async () => {\n` +
-          `  const { createMockModule } = await import('${mockModulePath}');\n` +
-          `  return createMockModule('${path}', ${JSON.stringify(exportNames)});\n` +
-          `});\n` +
-          `vi.mock('${path}', () => ${varName});`
-        )
-      }
-
-      // Remove the user's mockModule import since we inline the real import
-      transformed = transformed.replace(/import\s*\{[^}]*\bmockModule\b[^}]*\}\s*from\s*['"][^'"]+['"]\s*;?\n?/g, '')
+      const transformed = mocks
+        .reduce((acc, { varName, path }) => {
+          const original = new RegExp(
+            `const\\s+${varName}\\s*=\\s*mockModule\\s*<[^>]*>\\s*\\(\\s*['"]${escapeRegex(path)}['"]\\s*\\)`
+          )
+          const exportNames = analyzeModuleExports(path, id)
+          return acc.replace(
+            original,
+            `const ${varName} = await vi.hoisted(async () => {\n` +
+            `  const { createMockModule } = await import('${mockModulePath}');\n` +
+            `  return createMockModule('${path}', ${JSON.stringify(exportNames)});\n` +
+            `});\n` +
+            `vi.mock('${path}', () => ${varName});`
+          )
+        }, code)
+        .replace(/import\s*\{[^}]*\bmockModule\b[^}]*\}\s*from\s*['"][^'"]+['"]\s*;?\n?/g, '')
 
       return { code: transformed, map: null }
     },
