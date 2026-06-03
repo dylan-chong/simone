@@ -17,7 +17,7 @@ class Registry {
   }
 
   verifyAll(): void {
-    if (globalQueue.hasArgMismatch()) {
+    if (globalQueue.hasFailed()) {
       throw new SimoneAlreadyFailedError()
     }
     const unconsumed = globalQueue.getUnconsumed()

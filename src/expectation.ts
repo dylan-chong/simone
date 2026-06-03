@@ -22,7 +22,7 @@ interface QueuedExpectation {
 class GlobalExpectationQueue {
   private queue: QueuedExpectation[] = []
   private consumedCount = 0
-  private hadArgMismatch = false
+  private failed = false
 
   add(expectation: QueuedExpectation): void {
     this.queue.push(expectation)
@@ -30,6 +30,7 @@ class GlobalExpectationQueue {
 
   consume(fnName: string, calledArgs: unknown[]): unknown {
     if (this.consumedCount >= this.queue.length) {
+      this.failed = true
       throw new SimoneError(
         `${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`
       )
@@ -37,12 +38,13 @@ class GlobalExpectationQueue {
 
     const next = this.queue[this.consumedCount]
     if (next.fnName !== fnName) {
+      this.failed = true
       throw new SimoneError(
         `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
       )
     }
     if (!deepEqual(next.args, calledArgs)) {
-      this.hadArgMismatch = true
+      this.failed = true
       throw new SimoneError(
         `${fnName}() was called with wrong arguments\n\n` +
         formatArgsDiff(next.args, calledArgs)
@@ -66,14 +68,18 @@ class GlobalExpectationQueue {
     return this.queue.slice(this.consumedCount)
   }
 
-  hasArgMismatch(): boolean {
-    return this.hadArgMismatch
+  markFailed(): void {
+    this.failed = true
+  }
+
+  hasFailed(): boolean {
+    return this.failed
   }
 
   reset(): void {
     this.queue = []
     this.consumedCount = 0
-    this.hadArgMismatch = false
+    this.failed = false
   }
 }
 

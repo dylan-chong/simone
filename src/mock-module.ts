@@ -47,6 +47,7 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
   for (const name of functionNames) {
     (mod as any)[name] = (...args: unknown[]) => {
       if (!configuredFns.has(name)) {
+        globalQueue.markFailed()
         throw new SimoneError(`${moduleName}.${name}() was called but has no expectations configured`)
       }
       return globalQueue.consume(`${moduleName}.${name}`, args)
