@@ -203,10 +203,26 @@ describe('globalQueue', () => {
     expect(() => globalQueue.consume('mod.getUser', ['user-1'])).toThrow('fail')
   })
 
+  it('throw response is not triggered when args do not match', () => {
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.throw, error: new Error('fail') } })
+
+    expect(() => globalQueue.consume('mod.getUser', ['user-2'])).toThrow(
+      'mod.getUser() was called with wrong arguments'
+    )
+  })
+
   it('returns a rejected promise when response type is reject', async () => {
     globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.reject, error: new Error('denied') } })
 
     await expect(globalQueue.consume('mod.getUser', ['user-1'])).rejects.toThrow('denied')
+  })
+
+  it('reject response is not triggered when args do not match', () => {
+    globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.reject, error: new Error('denied') } })
+
+    expect(() => globalQueue.consume('mod.getUser', ['user-2'])).toThrow(
+      'mod.getUser() was called with wrong arguments'
+    )
   })
 
   it('invokes callback and returns its result', () => {
@@ -221,6 +237,16 @@ describe('globalQueue', () => {
 
     globalQueue.consume('mod.fn', ['x'])
     expect(received).toEqual(['x'])
+  })
+
+  it('callback is not invoked when args do not match', () => {
+    let called = false
+    globalQueue.add({ fnName: 'mod.fn', args: ['x'], response: { type: ResponseType.callback, fn: () => { called = true; return 'ok' } } })
+
+    expect(() => globalQueue.consume('mod.fn', ['y'])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+    expect(called).toBe(false)
   })
 
   it('matches complex nested object with arrays', () => {
