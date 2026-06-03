@@ -27,16 +27,6 @@ describe('loadProfile — expected failures', () => {
     await loadProfile('user-1')
   })
 
-  it.fails('loads a profile even though getUser should never be called', async () => {
-    // Fails because loadProfile calls getUser which is marked .never()
-    userService.expects('getUser').never()
-    emailService.expects('getEmailPreferences').withArgs('user-1').returns(
-      Promise.resolve({ marketing: true, notifications: true })
-    )
-
-    await loadProfile('user-1')
-  })
-
   it.fails('loads one profile but expects two users to be fetched', async () => {
     userService.expects('getUser').withArgs('user-1').returns(
       Promise.resolve({ id: 'user-1', name: 'Alice' })

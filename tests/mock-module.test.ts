@@ -35,12 +35,12 @@ describe('createMockModule', () => {
     )
   })
 
-  it('stub returns value when called and matches next in global queue', () => {
+  it('stub returns value when called and matches next in global queue', async () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
 
     const result = mod.getUser('user-1')
-    expect(result).resolves.toEqual({ id: 'user-1', name: 'Alice' })
+    await expect(result).resolves.toEqual({ id: 'user-1', name: 'Alice' })
   })
 
   it('stub throws when call does not match next expectation in queue', () => {
@@ -59,15 +59,6 @@ describe('createMockModule', () => {
     expect(() => mod.createUser('Bob', 25)).toThrow()
   })
 
-  it('.never() causes throw when function is called', () => {
-    const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('getUser').never()
-
-    expect(() => mod.getUser('anything')).toThrow(
-      'was called but is expected to never be called'
-    )
-  })
-
   it('expects throws for non-existent function name', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
 
@@ -77,21 +68,20 @@ describe('createMockModule', () => {
     )
   })
 
-  it('reset clears never-set', () => {
+  it('reset clears configured state', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('getUser').never()
+    mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
     mod.reset()
 
-    // After reset, getUser is unmocked (throws "no expectations configured", not "never")
     expect(() => mod.getUser('user-1')).toThrow('has no expectations configured')
   })
 
-  it('stub with multiple args returns value when all args match', () => {
+  it('stub with multiple args returns value when all args match', async () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: 'new-1' }))
 
     const result = mod.createUser('Bob', 25)
-    expect(result).resolves.toEqual({ id: 'new-1' })
+    await expect(result).resolves.toEqual({ id: 'new-1' })
   })
 
   it('stub with multiple args throws when args do not match', () => {

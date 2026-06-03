@@ -43,16 +43,4 @@ describe('loadProfile', () => {
     expect(bob.emailPrefs.marketing).toBe(false)
   })
 
-  it('ensures deleteUser and sendWelcomeEmail are never called', async () => {
-    userService.expects('deleteUser').never()
-    emailService.expects('sendWelcomeEmail').never()
-    userService.expects('getUser').withArgs('user-1').returns(
-      Promise.resolve({ id: 'user-1', name: 'Alice' })
-    )
-    emailService.expects('getEmailPreferences').withArgs('user-1').returns(
-      Promise.resolve({ marketing: true, notifications: true })
-    )
-
-    await loadProfile('user-1')
-  })
 })

@@ -36,7 +36,7 @@ describe('registry', () => {
     expect(() => registry.verifyAll()).not.toThrow()
   })
 
-  it('resetAll clears the globalQueue and registered modules never-sets', () => {
+  it('resetAll clears the globalQueue and resets registered modules', () => {
     globalQueue.add({ fnId: 'mod.getUser', args: ['user-1'], returnValue: 'x' })
     registry.resetAll()
 

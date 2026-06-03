@@ -39,15 +39,6 @@ describe('integration: mockModule with global ordering', () => {
     )
   })
 
-  it('throws when .never() function is called', () => {
-    const mathService = createMockModule<MathService>('mathService', ['add', 'multiply'])
-    mathService.expects('multiply').never()
-
-    expect(() => mathService.multiply(2, 3)).toThrow(
-      'is expected to never be called'
-    )
-  })
-
   it('enforces global call order across modules', () => {
     const mathService = createMockModule<MathService>('mathService', ['add', 'multiply'])
     const otherService = createMockModule<{ doThing: () => string }>('otherService', ['doThing'])

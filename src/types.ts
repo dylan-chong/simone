@@ -8,7 +8,6 @@ export interface MockedModule<Module> {
 
 export interface Expectation<Fn> {
   withArgs(...args: Fn extends (...a: infer A) => any ? A : never): ExpectationWithArgs<Fn>
-  never(): void
 }
 
 export interface ExpectationWithArgs<Fn> {

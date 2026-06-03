@@ -30,10 +30,6 @@ test('ExpectationWithArgs.returns enforces return type', () => {
   expectTypeOf<Returns>().parameter(0).toEqualTypeOf<Promise<{ id: string }>>()
 })
 
-test('Expectation.never returns void', () => {
-  type E = Expectation<(id: string) => Promise<{ id: string }>>
-  expectTypeOf<E['never']>().returns.toEqualTypeOf<void>()
-})
 
 test('mockModule expects only accepts function keys', () => {
   type Mod = MockedModule<TestModule>
