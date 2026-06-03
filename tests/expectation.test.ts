@@ -26,7 +26,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: 'return', value: 'Alice' } })
 
     expect(() => globalQueue.consume('mod.getUser', ['user-2'])).toThrow(
-      'expected mod.getUser("user-1") to be called next, but mod.getUser("user-2") was called'
+      'mod.getUser() was called with wrong arguments\n\n' +
+      '- arg 0: "user-1"\n' +
+      '+ arg 0: "user-2"'
     )
   })
 
@@ -54,7 +56,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.create', args: [{ name: 'Alice', age: 30 }], response: { type: 'return', value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow(
-      'expected mod.create({"name":"Alice","age":30}) to be called next, but mod.create({"name":"Bob","age":30}) was called'
+      'mod.create() was called with wrong arguments\n\n' +
+      '- arg 0: {\n  "name": "Alice",\n  "age": 30\n}\n' +
+      '+ arg 0: {\n  "name": "Bob",\n  "age": 30\n}'
     )
   })
 
@@ -68,7 +72,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: { b: { c: 1 } } }], response: { type: 'return', value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow(
-      'expected mod.fn({"a":{"b":{"c":1}}}) to be called next, but mod.fn({"a":{"b":{"c":2}}}) was called'
+      'mod.fn() was called with wrong arguments\n\n' +
+      '- arg 0: {\n  "a": {\n    "b": {\n      "c": 1\n    }\n  }\n}\n' +
+      '+ arg 0: {\n  "a": {\n    "b": {\n      "c": 2\n    }\n  }\n}'
     )
   })
 
@@ -82,7 +88,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow(
-      'expected mod.fn([1,2,3]) to be called next, but mod.fn([1,2]) was called'
+      'mod.fn() was called with wrong arguments\n\n' +
+      '- arg 0: [\n  1,\n  2,\n  3\n]\n' +
+      '+ arg 0: [\n  1,\n  2\n]'
     )
   })
 
@@ -90,7 +98,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2, 3]], response: { type: 'return', value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow(
-      'expected mod.fn([1,2,3]) to be called next, but mod.fn([1,2,4]) was called'
+      'mod.fn() was called with wrong arguments\n\n' +
+      '- arg 0: [\n  1,\n  2,\n  3\n]\n' +
+      '+ arg 0: [\n  1,\n  2,\n  4\n]'
     )
   })
 
@@ -98,7 +108,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [null], response: { type: 'return', value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{}])).toThrow(
-      'expected mod.fn(null) to be called next, but mod.fn({}) was called'
+      'mod.fn() was called with wrong arguments\n\n' +
+      '- arg 0: null\n' +
+      '+ arg 0: {}'
     )
   })
 
@@ -106,7 +118,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [[1, 2]], response: { type: 'return', value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow(
-      'expected mod.fn([1,2]) to be called next, but mod.fn({"0":1,"1":2}) was called'
+      'mod.fn() was called with wrong arguments\n\n' +
+      '- arg 0: [\n  1,\n  2\n]\n' +
+      '+ arg 0: {\n  "0": 1,\n  "1": 2\n}'
     )
   })
 
@@ -120,7 +134,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1 }], response: { type: 'return', value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow(
-      'expected mod.fn({"a":1}) to be called next, but mod.fn({"a":1,"b":2}) was called'
+      'mod.fn() was called with wrong arguments\n\n' +
+      '- arg 0: {\n  "a": 1\n}\n' +
+      '+ arg 0: {\n  "a": 1,\n  "b": 2\n}'
     )
   })
 
@@ -128,7 +144,9 @@ describe('globalQueue', () => {
     globalQueue.add({ fnName: 'mod.fn', args: [{ a: 1, b: 2 }], response: { type: 'return', value: 'ok' } })
 
     expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow(
-      'expected mod.fn({"a":1,"b":2}) to be called next, but mod.fn({"a":1}) was called'
+      'mod.fn() was called with wrong arguments\n\n' +
+      '- arg 0: {\n  "a": 1,\n  "b": 2\n}\n' +
+      '+ arg 0: {\n  "a": 1\n}'
     )
   })
 

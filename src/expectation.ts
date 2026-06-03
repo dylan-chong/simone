@@ -33,9 +33,15 @@ class GlobalExpectationQueue {
     }
 
     const next = this.queue[this.consumedCount]
-    if (next.fnName !== fnName || !deepEqual(next.args, calledArgs)) {
+    if (next.fnName !== fnName) {
       throw new Error(
         `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
+      )
+    }
+    if (!deepEqual(next.args, calledArgs)) {
+      throw new Error(
+        `${fnName}() was called with wrong arguments\n\n` +
+        formatArgsDiff(next.args, calledArgs)
       )
     }
 
@@ -66,6 +72,22 @@ export const globalQueue = new GlobalExpectationQueue()
 
 function formatArgs(args: unknown[]): string {
   return args.map((a) => JSON.stringify(a)).join(', ')
+}
+
+function formatArgsDiff(expected: unknown[], actual: unknown[]): string {
+  const lines: string[] = []
+  const maxLen = Math.max(expected.length, actual.length)
+  for (let i = 0; i < maxLen; i++) {
+    const exp = i < expected.length ? JSON.stringify(expected[i], null, 2) : undefined
+    const act = i < actual.length ? JSON.stringify(actual[i], null, 2) : undefined
+    if (exp === act) {
+      lines.push(`  arg ${i}: ${act}`)
+    } else {
+      if (exp !== undefined) lines.push(`- arg ${i}: ${exp}`)
+      if (act !== undefined) lines.push(`+ arg ${i}: ${act}`)
+    }
+  }
+  return lines.join('\n')
 }
 
 function deepEqual(a: unknown, b: unknown): boolean {

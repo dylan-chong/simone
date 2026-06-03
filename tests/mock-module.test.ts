@@ -48,7 +48,9 @@ describe('createMockModule', () => {
     mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
 
     expect(() => mod.getUser('wrong-id')).toThrow(
-      'expected userService.getUser("user-1") to be called next, but userService.getUser("wrong-id") was called'
+      'userService.getUser() was called with wrong arguments\n\n' +
+      '- arg 0: "user-1"\n' +
+      '+ arg 0: "wrong-id"'
     )
   })
 
@@ -92,7 +94,11 @@ describe('createMockModule', () => {
     mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: 'new-1' }))
 
     expect(() => mod.createUser('Alice', 30)).toThrow(
-      'expected userService.createUser("Bob", 25) to be called next, but userService.createUser("Alice", 30) was called'
+      'userService.createUser() was called with wrong arguments\n\n' +
+      '- arg 0: "Bob"\n' +
+      '+ arg 0: "Alice"\n' +
+      '- arg 1: 25\n' +
+      '+ arg 1: 30'
     )
   })
 
@@ -109,7 +115,9 @@ describe('createMockModule', () => {
     mod.expects('getUser').withArgs('user-1').calls(async (id) => ({ id, name: 'X' }))
 
     expect(() => mod.getUser('wrong-id')).toThrow(
-      'expected userService.getUser("user-1") to be called next, but userService.getUser("wrong-id") was called'
+      'userService.getUser() was called with wrong arguments\n\n' +
+      '- arg 0: "user-1"\n' +
+      '+ arg 0: "wrong-id"'
     )
   })
 
