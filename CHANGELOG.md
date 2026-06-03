@@ -3,7 +3,7 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
-## [1.5.0] - 2026-06-04
+## [2.0.0] - 2026-06-04
 ### Added
 - `ramda` as runtime dependency for robust deep equality comparison
 - Circular reference detection in diff output (shows `[Circular]`)
@@ -12,9 +12,11 @@ This repository adheres to semantic versioning and follows the conventions of [k
 ### Fixed
 - Plugin import-removal no longer strips co-imported names (e.g. `verifyAll` alongside `mockModule`)
 - Plugin regex now handles nested angle brackets in type params (e.g. `Record<string, Fn>`)
+- ESM module resolution — published package now works correctly when installed via npm
 
 ### Changed
-- Deep equality uses `R.equals` instead of custom implementation — correctly handles Date, RegExp, Map, Set
+- **BREAKING** Deep equality uses `R.equals` instead of custom implementation — `Date`, `RegExp`, `Map`, `Set` are now compared by value, not by object identity
+- **BREAKING** `mockModule()` throws `SimoneError` when called without the Vite plugin (previously returned a silently broken mock)
 - Plugin internals extracted into well-named helpers (`replaceMockModuleCalls`, `stripMockModuleImport`, `resolveModulePath`)
 - All `while` loops replaced with `for...of` using `matchAll`
 - All `let` variables replaced with `const` using `reduce` and early-return helpers
