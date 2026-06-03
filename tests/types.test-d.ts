@@ -76,6 +76,12 @@ test('resolves is never for non-Promise return types', () => {
   expectTypeOf<EWA['resolves']>().parameter(0).toEqualTypeOf<never>()
 })
 
+test('rejects is never for non-Promise return types', () => {
+  type SyncModule = { syncFn: (x: number) => number }
+  type EWA = ExpectationWithArgs<SyncModule['syncFn']>
+  expectTypeOf<EWA['rejects']>().parameter(0).toEqualTypeOf<never>()
+})
+
 test('MockModuleInstance has both expects and callable function stubs', () => {
   type Instance = MockModuleInstance<TestModule>
   // Has expects method
