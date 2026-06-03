@@ -98,15 +98,15 @@ function formatArgsDiff(expected: unknown[], actual: unknown[]): string {
     if (exp === act) {
       const prefix = `  arg ${i}: `
       lines.push(prefix + indent(act!, prefix.length))
-    } else {
-      if (exp !== undefined) {
-        const prefix = `- arg ${i}: `
-        lines.push(prefix + indent(exp, prefix.length))
-      }
-      if (act !== undefined) {
-        const prefix = `+ arg ${i}: `
-        lines.push(prefix + indent(act, prefix.length))
-      }
+      continue
+    }
+    if (exp !== undefined) {
+      const prefix = `- arg ${i}: `
+      lines.push(prefix + indent(exp, prefix.length))
+    }
+    if (act !== undefined) {
+      const prefix = `+ arg ${i}: `
+      lines.push(prefix + indent(act, prefix.length))
     }
   }
   return lines.join('\n')
