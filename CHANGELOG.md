@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-06-04
+### Added
+- README section on handling non-determinism (fake timers for Date.now, mocking uuid)
+
 ## [3.1.0] - 2026-06-04
 ### Changed
 - Convention: all `mockModule` variables now use `Mock` suffix (e.g. `userServiceMock`)

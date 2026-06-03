@@ -4,6 +4,8 @@ Typed mock expectations for Vitest. Sinon-style API with full TypeScript inferen
 
 Opinionated towards a semi-functional style where you mock exported functions on a module. OOP-style mocks (classes, instances, method stubs) are not supported.
 
+Intentionally restrictive — strict argument matching and global call ordering force LLMs (and humans) to write precise, deterministic tests instead of loose assertions that pass accidentally. Because of this, Claude can get desperate, so it'll need guidance on how to write tests properly.
+
 ## Install
 
 ```bash
@@ -72,6 +74,65 @@ Shorthand for `.returns(Promise.reject(error))`. Only available when the functio
 ### `.expects(name).withArgs(...args).calls(fn)`
 
 Invokes `fn` with the matched args to compute the return value. `fn` must match the original function's signature.
+
+## Handling Non-Determinism
+
+Simone uses strict argument matching — every arg must match exactly. This means non-deterministic values need to be controlled in your tests:
+
+**`Date.now()` / `new Date()`** — use Vitest's fake timers:
+
+```ts
+import { vi } from 'vitest'
+
+beforeEach(() => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date('2024-01-15T10:00:00Z'))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
+```
+
+**UUID generation** — mock the uuid library so you can expect exact values:
+
+```ts
+import { mockModule } from 'simone'
+
+const uuidMock = mockModule(import('uuid'))
+
+it('creates a user with a generated id', () => {
+  uuidMock.expects('v4').withArgs().returns('test-uuid-1234')
+
+  const user = createUser('Alice')
+  expect(user.id).toBe('test-uuid-1234')
+})
+```
+
+**Globals (localStorage, fetch, etc.)** — wrap in a module, then mock the wrapper:
+
+```ts
+// src/storage.ts
+export function getItem(key: string): string | null {
+  return localStorage.getItem(key)
+}
+
+export function setItem(key: string, value: string): void {
+  localStorage.setItem(key, value)
+}
+```
+
+```ts
+// src/app.test.ts
+const storageMock = mockModule(import('./storage'))
+
+it('reads the auth token from storage', () => {
+  storageMock.expects('getItem').withArgs('auth-token').returns('abc123')
+
+  const token = getAuthToken()
+  expect(token).toBe('abc123')
+})
+```
 
 ## Strict Behavior
 
