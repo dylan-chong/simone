@@ -1,3 +1,4 @@
+import * as R from 'ramda'
 import { SimoneError } from './errors'
 
 export enum ResponseType {
@@ -43,7 +44,7 @@ class GlobalExpectationQueue {
         `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
       )
     }
-    if (!deepEqual(next.args, calledArgs)) {
+    if (!R.equals(next.args, calledArgs)) {
       this.failed = true
       throw new SimoneError(
         `${fnName}() was called with wrong arguments\n\n` +
@@ -118,35 +119,18 @@ function indent(str: string, width: number): string {
 }
 
 function stableStringify(value: unknown): string {
-  return JSON.stringify(sortKeys(value), null, 2)
+  const seen = new WeakSet<object>()
+  return JSON.stringify(sortKeys(value, seen), null, 2)
 }
 
-function sortKeys(value: unknown): unknown {
+function sortKeys(value: unknown, seen: WeakSet<object>): unknown {
   if (value === null || typeof value !== 'object') return value
-  if (Array.isArray(value)) return value.map(sortKeys)
+  if (seen.has(value)) return '[Circular]'
+  seen.add(value)
+  if (Array.isArray(value)) return value.map((v) => sortKeys(v, seen))
   const sorted: Record<string, unknown> = {}
   for (const key of Object.keys(value as Record<string, unknown>).sort()) {
-    sorted[key] = sortKeys((value as Record<string, unknown>)[key])
+    sorted[key] = sortKeys((value as Record<string, unknown>)[key], seen)
   }
   return sorted
-}
-
-function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true
-  if (a === null || b === null) return false
-  if (typeof a !== 'object' || typeof b !== 'object') return false
-
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false
-    return a.every((item, i) => deepEqual(item, b[i]))
-  }
-  if (Array.isArray(a) || Array.isArray(b)) return false
-
-  const aObj = a as Record<string, unknown>
-  const bObj = b as Record<string, unknown>
-  const aKeys = Object.keys(aObj)
-  const bKeys = Object.keys(bObj)
-
-  if (aKeys.length !== bKeys.length) return false
-  return aKeys.every((key) => deepEqual(aObj[key], bObj[key]))
 }
