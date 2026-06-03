@@ -53,6 +53,16 @@ test('returns enforces correct return type from module', () => {
   expectTypeOf<EWA['returns']>().parameter(0).toEqualTypeOf<Promise<{ id: string; name: string }>>()
 })
 
+test('withArgs enforces multiple argument types', () => {
+  type CreateUserWithArgs = Expectation<TestModule['createUser']>['withArgs']
+  // Valid: (name: string, age: number)
+  expectTypeOf<CreateUserWithArgs>().parameters.toEqualTypeOf<[name: string, age: number]>()
+  // @ts-expect-error - number is not assignable to string (first arg)
+  expectTypeOf<CreateUserWithArgs>().parameters.toEqualTypeOf<[name: number, age: number]>()
+  // @ts-expect-error - string is not assignable to number (second arg)
+  expectTypeOf<CreateUserWithArgs>().parameters.toEqualTypeOf<[name: string, age: string]>()
+})
+
 test('MockModuleInstance has both expects and callable function stubs', () => {
   type Instance = MockModuleInstance<TestModule>
   // Has expects method

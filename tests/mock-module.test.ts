@@ -86,6 +86,21 @@ describe('createMockModule', () => {
     expect(() => mod.getUser('user-1')).toThrow('has no expectations configured')
   })
 
+  it('stub with multiple args returns value when all args match', () => {
+    const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
+    mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: 'new-1' }))
+
+    const result = mod.createUser('Bob', 25)
+    expect(result).resolves.toEqual({ id: 'new-1' })
+  })
+
+  it('stub with multiple args throws when args do not match', () => {
+    const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
+    mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: 'new-1' }))
+
+    expect(() => mod.createUser('Alice', 30)).toThrow()
+  })
+
   it('registers itself in the global registry', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     expect(registry.getAll()).toContain(mod)
