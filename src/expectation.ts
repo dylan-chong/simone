@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import { SimoneError } from './errors'
+import { SimoneError } from './errors.js'
 
 export enum ResponseType {
   return = 'return',

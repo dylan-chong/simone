@@ -1,7 +1,7 @@
-import { globalQueue, ResponseType } from './expectation'
-import { SimoneError } from './errors'
-import { registry, type Resettable } from './registry'
-import type { MockModuleInstance, ExpectationWithArgs } from './types'
+import { globalQueue, ResponseType } from './expectation.js'
+import { SimoneError } from './errors.js'
+import { registry, type Resettable } from './registry.js'
+import type { MockModuleInstance, ExpectationWithArgs } from './types.js'
 
 type MockModuleInternal<Module> = MockModuleInstance<Module> & Resettable
 

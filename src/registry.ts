@@ -1,5 +1,5 @@
-import { globalQueue } from './expectation'
-import { SimoneError, SimoneAlreadyFailedError } from './errors'
+import { globalQueue } from './expectation.js'
+import { SimoneError, SimoneAlreadyFailedError } from './errors.js'
 
 export interface Resettable {
   reset(): void

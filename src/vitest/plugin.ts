@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 
 export function simonePlugin(): Plugin {
   const currentDir = dirname(fileURLToPath(import.meta.url))
-  const mockModulePath = resolve(currentDir, '../mock-module.ts')
+  const mockModulePath = resolve(currentDir, '../mock-module.js')
 
   return {
     name: 'simone',
@@ -14,7 +14,7 @@ export function simonePlugin(): Plugin {
     config() {
       return {
         test: {
-          setupFiles: [resolve(currentDir, './setup.ts')],
+          setupFiles: [resolve(currentDir, './setup.js')],
         },
       } as UserConfig
     },

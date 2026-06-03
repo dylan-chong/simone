@@ -3,7 +3,9 @@
   "compilerOptions": {
     "declaration": false,
     "outDir": null,
-    "rootDir": null
+    "rootDir": null,
+    "moduleResolution": "bundler",
+    "module": "ESNext"
   },
   "include": ["src/**/*"]
 }

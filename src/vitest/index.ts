@@ -1,1 +1,1 @@
-export { simonePlugin } from './plugin'
+export { simonePlugin } from './plugin.js'

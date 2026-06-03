@@ -1,9 +1,9 @@
-import { registry } from './registry'
-import { SimoneError } from './errors'
-import type { MockModuleInstance } from './types'
+import { registry } from './registry.js'
+import { SimoneError } from './errors.js'
+import type { MockModuleInstance } from './types.js'
 
-export type { MockedModule, MockModuleInstance, Expectation, ExpectationWithArgs, FunctionKeys } from './types'
-export { SimoneError, SimoneAlreadyFailedError } from './errors'
+export type { MockedModule, MockModuleInstance, Expectation, ExpectationWithArgs, FunctionKeys } from './types.js'
+export { SimoneError, SimoneAlreadyFailedError } from './errors.js'
 
 export function mockModule<Module>(path: string): MockModuleInstance<Module> {
   throw new SimoneError(
