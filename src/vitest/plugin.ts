@@ -1,0 +1,88 @@
+import type { Plugin, UserConfig } from 'vite'
+import { readFileSync, existsSync } from 'fs'
+import { dirname, resolve } from 'path'
+import { fileURLToPath } from 'url'
+
+export function simonePlugin(): Plugin {
+  return {
+    name: 'simone',
+    enforce: 'pre',
+
+    config() {
+      const currentDir = dirname(fileURLToPath(import.meta.url))
+      return {
+        test: {
+          setupFiles: [resolve(currentDir, './setup.ts')],
+        },
+      } as UserConfig
+    },
+
+    transform(code: string, id: string) {
+      if (!code.includes('mockModule')) return null
+      if (id.includes('node_modules')) return null
+
+      const mockModuleRegex = /const\s+(\w+)\s*=\s*mockModule\s*<[^>]*>\s*\(\s*['"]([^'"]+)['"]\s*\)/g
+      let transformed = code
+      const mocks: { varName: string; path: string }[] = []
+
+      let match: RegExpExecArray | null
+      while ((match = mockModuleRegex.exec(code)) !== null) {
+        mocks.push({ varName: match[1], path: match[2] })
+      }
+
+      if (mocks.length === 0) return null
+
+      for (const { varName, path } of mocks) {
+        const original = new RegExp(
+          `const\\s+${varName}\\s*=\\s*mockModule\\s*<[^>]*>\\s*\\(\\s*['"]${escapeRegex(path)}['"]\\s*\\)`
+        )
+        const exportNames = analyzeModuleExports(path, id)
+        transformed = transformed.replace(
+          original,
+          `const ${varName} = vi.hoisted(() => mockModule('${path}', ${JSON.stringify(exportNames)}));\nvi.mock('${path}', () => ${varName});`
+        )
+      }
+
+      return { code: transformed, map: null }
+    },
+  }
+}
+
+function analyzeModuleExports(modulePath: string, importerId: string): string[] {
+  const dir = dirname(importerId)
+  const resolved = resolve(dir, modulePath)
+  const extensions = ['.ts', '.tsx', '.js', '.jsx']
+
+  let filePath: string | null = null
+  for (const ext of extensions) {
+    const candidate = resolved.endsWith(ext) ? resolved : resolved + ext
+    if (existsSync(candidate)) {
+      filePath = candidate
+      break
+    }
+  }
+
+  if (!filePath) return []
+
+  const source = readFileSync(filePath, 'utf-8')
+  const names: string[] = []
+
+  // Match: export function name(...) or export async function name(...)
+  const functionExportRegex = /export\s+(?:async\s+)?function\s+(\w+)/g
+  let m: RegExpExecArray | null
+  while ((m = functionExportRegex.exec(source)) !== null) {
+    names.push(m[1])
+  }
+
+  // Match: export const fn = (...) => ... or export const fn = async (...) => ...
+  const arrowExportRegex = /export\s+const\s+(\w+)\s*=\s*(?:async\s*)?\(/g
+  while ((m = arrowExportRegex.exec(source)) !== null) {
+    names.push(m[1])
+  }
+
+  return names
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}

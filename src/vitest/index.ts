@@ -1,0 +1,1 @@
+export { simonePlugin } from './plugin'
