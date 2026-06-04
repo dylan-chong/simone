@@ -76,6 +76,24 @@ Shorthand for `.returns(Promise.reject(error))`. Only available when the functio
 
 Invokes `fn` with the matched args to compute the return value. `fn` must match the original function's signature.
 
+### Void functions
+
+For functions that return `void` or `Promise<void>`, pass `undefined` explicitly:
+
+```ts
+// sync void
+loggerMock
+  .expects('info')
+  .withArgs('user created')
+  .returns(undefined)
+
+// async void
+userServiceMock
+  .expects('deleteUser')
+  .withArgs({ id: 'user-1' })
+  .resolves(undefined)
+```
+
 ## Handling Non-Determinism
 
 Simone uses strict argument matching — every arg must match exactly. This means non-deterministic values need to be controlled in your tests:

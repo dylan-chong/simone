@@ -7,3 +7,7 @@ export async function sendWelcomeEmail(request: SendEmailRequest): Promise<SendE
 export async function getEmailPreferences(query: EmailQuery): Promise<EmailPreferences> {
   throw new Error('real implementation — hits database')
 }
+
+export function logEmailEvent(event: string): void {
+  throw new Error('real implementation — writes to event log')
+}

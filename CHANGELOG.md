@@ -3,6 +3,11 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [4.0.1] - 2026-06-04
+### Added
+- README section documenting void functions (pass `undefined` to `.returns()` / `.resolves()`)
+- Example project: `deleteProfile` demonstrating sync void and async void mocking
+
 ## [4.0.0] - 2026-06-04
 ### Changed
 - **BREAKING** Async functions (returning `Promise`) only expose `.resolves()`, `.rejects()`, and `.calls()` — `.returns()` and `.throws()` are no longer available

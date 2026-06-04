@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mockModule } from '../../src/index'
 import { Channel } from './types'
-import { loadProfile } from './profile-loader'
+import { loadProfile, deleteProfile } from './profile-loader'
 
 const userServiceMock = mockModule(import('./user-service'))
 const emailServiceMock = mockModule(import('./email-service'))
@@ -109,5 +109,20 @@ describe('loadProfile', () => {
       emailPrefs: { marketing: false, notifications: true },
       loadedAt: expect.any(Number),
     })
+  })
+})
+
+describe('deleteProfile', () => {
+  it('logs the event and deletes the user', async () => {
+    emailServiceMock
+      .expects('logEmailEvent')
+      .withArgs('profile-deleted:user-1')
+      .returns(undefined)
+    userServiceMock
+      .expects('deleteUser')
+      .withArgs({ id: 'user-1' })
+      .resolves(undefined)
+
+    await deleteProfile('user-1')
   })
 })

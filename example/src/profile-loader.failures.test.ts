@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mockModule } from '../../src/index'
 import { Channel } from './types'
-import { loadProfile } from './profile-loader'
+import { loadProfile, deleteProfile } from './profile-loader'
 
 const userServiceMock = mockModule(import('./user-service'))
 const emailServiceMock = mockModule(import('./email-service'))
@@ -57,5 +57,16 @@ describe('loadProfile — expected failures', () => {
       .resolves({ marketing: true, notifications: true })
 
     await loadProfile('user-1', Channel.Web)
+  })
+})
+
+describe('deleteProfile — expected failures', () => {
+  it.fails('deletes without logging the event first', async () => {
+    userServiceMock
+      .expects('deleteUser')
+      .withArgs({ id: 'user-1' })
+      .resolves(undefined)
+
+    await deleteProfile('user-1')
   })
 })
