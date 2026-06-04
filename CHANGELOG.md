@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [4.0.2] - 2026-06-04
+### Added
+- README section documenting no-arg functions (`.withArgs()` still required, called with no arguments)
+
 ## [4.0.1] - 2026-06-04
 ### Added
 - README section documenting void functions (pass `undefined` to `.returns()` / `.resolves()`)

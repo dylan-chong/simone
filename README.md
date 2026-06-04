@@ -76,6 +76,17 @@ Shorthand for `.returns(Promise.reject(error))`. Only available when the functio
 
 Invokes `fn` with the matched args to compute the return value. `fn` must match the original function's signature.
 
+### No-arg functions
+
+Functions with no arguments still require `.withArgs()` — call it with no arguments:
+
+```ts
+serviceMock
+  .expects('healthCheck')
+  .withArgs()
+  .resolves({ ok: true })
+```
+
 ### Void functions
 
 For functions that return `void` or `Promise<void>`, pass `undefined` explicitly:
