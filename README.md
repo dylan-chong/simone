@@ -33,9 +33,10 @@ import { loadProfile } from './profile-loader'
 const userServiceMock = mockModule(import('./user-service'))
 
 it('loads a user profile', async () => {
-  userServiceMock.expects('getUser').withArgs('user-1').returns(
-    Promise.resolve({ id: 'user-1', name: 'Alice' })
-  )
+  userServiceMock
+    .expects('getUser')
+    .withArgs('user-1')
+    .returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
 
   const profile = await loadProfile('user-1')
   expect(profile.name).toBe('Alice')
@@ -102,35 +103,47 @@ import { mockModule } from 'simone'
 const uuidMock = mockModule(import('uuid'))
 
 it('creates a user with a generated id', () => {
-  uuidMock.expects('v4').withArgs().returns('test-uuid-1234')
+  uuidMock
+    .expects('v4')
+    .withArgs()
+    .returns('test-uuid-1234')
 
   const user = createUser('Alice')
   expect(user.id).toBe('test-uuid-1234')
 })
 ```
 
-**Globals (localStorage, fetch, etc.)** — wrap in a module, then mock the wrapper:
+**Globals (DOM, fetch, etc.)** — wrap in a module, then mock the wrapper:
 
 ```ts
-// src/storage.ts
-export function getItem(key: string): string | null {
-  return localStorage.getItem(key)
+// src/dom.ts
+export function createDiv(): HTMLDivElement {
+  return document.createElement('div')
 }
 
-export function setItem(key: string, value: string): void {
-  localStorage.setItem(key, value)
+export function appendChild(parent: HTMLElement, child: HTMLElement): void {
+  parent.appendChild(child)
 }
 ```
 
 ```ts
-// src/app.test.ts
-const storageMock = mockModule(import('./storage'))
+// src/renderer.test.ts
+const domMock = mockModule(import('./dom'))
 
-it('reads the auth token from storage', () => {
-  storageMock.expects('getItem').withArgs('auth-token').returns('abc123')
+it('creates a div and appends it to the container', () => {
+  const fakeDiv = { id: 'widget' } as unknown as HTMLDivElement
+  const container = { id: 'root' } as unknown as HTMLElement
 
-  const token = getAuthToken()
-  expect(token).toBe('abc123')
+  domMock
+    .expects('createDiv')
+    .withArgs()
+    .returns(fakeDiv)
+  domMock
+    .expects('appendChild')
+    .withArgs(container, fakeDiv)
+    .returns(undefined)
+
+  renderWidget(container)
 })
 ```
 

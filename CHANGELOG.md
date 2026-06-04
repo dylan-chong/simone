@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [3.1.2] - 2026-06-04
+### Changed
+- Reformat all mock expectation chains to multiline style (one method per line)
+
 ## [3.1.1] - 2026-06-04
 ### Added
 - README section on handling non-determinism (fake timers for Date.now, mocking uuid)
