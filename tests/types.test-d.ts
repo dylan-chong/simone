@@ -1,5 +1,5 @@
 import { expectTypeOf, test } from 'vitest'
-import type { FunctionKeys, MockedModule, MockModuleInstance, Expectation, ExpectationWithArgs } from '../src/types'
+import type { FunctionKeys, MockedModule, MockModuleInstance, Expectation, ExpectationWithArgs, SyncExpectationWithArgs, AsyncExpectationWithArgs } from '../src/types'
 
 // Test module with mixed exports
 type TestModule = {
@@ -8,6 +8,8 @@ type TestModule = {
   API_VERSION: string
   config: { timeout: number }
 }
+
+type SyncModule = { syncFn: (x: number) => number }
 
 test('FunctionKeys extracts only function-typed keys', () => {
   expectTypeOf<FunctionKeys<TestModule>>().toEqualTypeOf<'getUser' | 'createUser'>()
@@ -24,12 +26,47 @@ test('Expectation.withArgs enforces parameter types', () => {
   expectTypeOf<WithArgs>().parameters.toEqualTypeOf<[id: string]>()
 })
 
-test('ExpectationWithArgs.returns enforces return type', () => {
-  type EWA = ExpectationWithArgs<(id: string) => Promise<{ id: string }>>
-  type Returns = EWA['returns']
-  expectTypeOf<Returns>().parameter(0).toEqualTypeOf<Promise<{ id: string }>>()
+test('async function gets AsyncExpectationWithArgs', () => {
+  type EWA = ExpectationWithArgs<TestModule['getUser']>
+  expectTypeOf<EWA>().toEqualTypeOf<AsyncExpectationWithArgs<TestModule['getUser']>>()
 })
 
+test('sync function gets SyncExpectationWithArgs', () => {
+  type EWA = ExpectationWithArgs<SyncModule['syncFn']>
+  expectTypeOf<EWA>().toEqualTypeOf<SyncExpectationWithArgs<SyncModule['syncFn']>>()
+})
+
+test('AsyncExpectationWithArgs.resolves unwraps Promise return type', () => {
+  type EWA = AsyncExpectationWithArgs<TestModule['getUser']>
+  expectTypeOf<EWA['resolves']>().parameter(0).toEqualTypeOf<{ id: string; name: string }>()
+})
+
+test('AsyncExpectationWithArgs.rejects accepts unknown', () => {
+  type EWA = AsyncExpectationWithArgs<TestModule['getUser']>
+  expectTypeOf<EWA['rejects']>().parameter(0).toEqualTypeOf<unknown>()
+})
+
+test('AsyncExpectationWithArgs does not have returns or throws', () => {
+  type EWA = AsyncExpectationWithArgs<TestModule['getUser']>
+  expectTypeOf<EWA>().not.toHaveProperty('returns')
+  expectTypeOf<EWA>().not.toHaveProperty('throws')
+})
+
+test('SyncExpectationWithArgs.returns enforces return type', () => {
+  type EWA = SyncExpectationWithArgs<SyncModule['syncFn']>
+  expectTypeOf<EWA['returns']>().parameter(0).toEqualTypeOf<number>()
+})
+
+test('SyncExpectationWithArgs.throws accepts unknown', () => {
+  type EWA = SyncExpectationWithArgs<SyncModule['syncFn']>
+  expectTypeOf<EWA['throws']>().parameter(0).toEqualTypeOf<unknown>()
+})
+
+test('SyncExpectationWithArgs does not have resolves or rejects', () => {
+  type EWA = SyncExpectationWithArgs<SyncModule['syncFn']>
+  expectTypeOf<EWA>().not.toHaveProperty('resolves')
+  expectTypeOf<EWA>().not.toHaveProperty('rejects')
+})
 
 test('mockModule expects only accepts function keys', () => {
   type Mod = MockedModule<TestModule>
@@ -38,55 +75,17 @@ test('mockModule expects only accepts function keys', () => {
 })
 
 test('withArgs enforces correct argument types from module', () => {
-  type Mod = MockedModule<TestModule>
-  type CreateUserExp = ReturnType<Mod['expects']>
-  // Verify expects('createUser') returns Expectation with correct arg types
   expectTypeOf<Expectation<TestModule['createUser']>['withArgs']>().parameters.toEqualTypeOf<[name: string, age: number]>()
 })
 
-test('returns enforces correct return type from module', () => {
-  type EWA = ExpectationWithArgs<TestModule['getUser']>
-  expectTypeOf<EWA['returns']>().parameter(0).toEqualTypeOf<Promise<{ id: string; name: string }>>()
-})
-
-test('withArgs enforces multiple argument types', () => {
-  type CreateUserWithArgs = Expectation<TestModule['createUser']>['withArgs']
-  // Valid: (name: string, age: number)
-  expectTypeOf<CreateUserWithArgs>().parameters.toEqualTypeOf<[name: string, age: number]>()
-  // @ts-expect-error - number is not assignable to string (first arg)
-  expectTypeOf<CreateUserWithArgs>().parameters.toEqualTypeOf<[name: number, age: number]>()
-  // @ts-expect-error - string is not assignable to number (second arg)
-  expectTypeOf<CreateUserWithArgs>().parameters.toEqualTypeOf<[name: string, age: string]>()
-})
-
 test('calls enforces correct function signature', () => {
-  type EWA = ExpectationWithArgs<TestModule['getUser']>
+  type EWA = AsyncExpectationWithArgs<TestModule['getUser']>
   expectTypeOf<EWA['calls']>().parameter(0).toEqualTypeOf<TestModule['getUser']>()
-})
-
-test('resolves unwraps Promise return type', () => {
-  type EWA = ExpectationWithArgs<TestModule['getUser']>
-  // getUser returns Promise<{ id: string; name: string }>, so resolves accepts the unwrapped type
-  expectTypeOf<EWA['resolves']>().parameter(0).toEqualTypeOf<{ id: string; name: string }>()
-})
-
-test('resolves is never for non-Promise return types', () => {
-  type SyncModule = { syncFn: (x: number) => number }
-  type EWA = ExpectationWithArgs<SyncModule['syncFn']>
-  expectTypeOf<EWA['resolves']>().parameter(0).toEqualTypeOf<never>()
-})
-
-test('rejects is never for non-Promise return types', () => {
-  type SyncModule = { syncFn: (x: number) => number }
-  type EWA = ExpectationWithArgs<SyncModule['syncFn']>
-  expectTypeOf<EWA['rejects']>().parameter(0).toEqualTypeOf<never>()
 })
 
 test('MockModuleInstance has both expects and callable function stubs', () => {
   type Instance = MockModuleInstance<TestModule>
-  // Has expects method
   expectTypeOf<Instance['expects']>().toBeFunction()
-  // Has function stubs with correct signatures
   expectTypeOf<Instance['getUser']>().toEqualTypeOf<TestModule['getUser']>()
   expectTypeOf<Instance['createUser']>().toEqualTypeOf<TestModule['createUser']>()
 })

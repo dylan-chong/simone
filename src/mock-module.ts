@@ -1,7 +1,7 @@
 import { globalQueue, ResponseType } from './expectation.js'
 import { SimoneError } from './errors.js'
 import { registry, type Resettable } from './registry.js'
-import type { MockModuleInstance, ExpectationWithArgs } from './types.js'
+import type { MockModuleInstance, SyncExpectationWithArgs, AsyncExpectationWithArgs } from './types.js'
 
 type MockModuleInternal<Module> = MockModuleInstance<Module> & Resettable
 
@@ -15,7 +15,7 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
       }
 
       return {
-        withArgs(...args: unknown[]): ExpectationWithArgs<any> {
+        withArgs(...args: unknown[]): SyncExpectationWithArgs<any> & AsyncExpectationWithArgs<any> {
           configuredFns.add(name)
           const fnName = `${moduleName}.${name}`
           return {

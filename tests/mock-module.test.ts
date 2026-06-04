@@ -37,7 +37,7 @@ describe('createMockModule', () => {
 
   it('stub returns value when called and matches next in global queue', async () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
+    mod.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
 
     const result = mod.getUser('user-1')
     await expect(result).resolves.toEqual({ id: 'user-1', name: 'Alice' })
@@ -45,7 +45,7 @@ describe('createMockModule', () => {
 
   it('stub throws when call does not match next expectation in queue', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
+    mod.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
 
     expect(() => mod.getUser('wrong-id')).toThrow(`userService.getUser() was called with wrong arguments
 
@@ -55,8 +55,8 @@ describe('createMockModule', () => {
 
   it('enforces global ordering across functions', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
-    mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: '2' }))
+    mod.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
+    mod.expects('createUser').withArgs('Bob', 25).resolves({ id: '2' })
 
     expect(() => mod.createUser('Bob', 25)).toThrow(
       'expected userService.getUser("user-1") to be called next, but userService.createUser("Bob", 25) was called'
@@ -74,7 +74,7 @@ describe('createMockModule', () => {
 
   it('reset clears configured state', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('getUser').withArgs('user-1').returns(Promise.resolve({ id: 'user-1', name: 'Alice' }))
+    mod.expects('getUser').withArgs('user-1').resolves({ id: 'user-1', name: 'Alice' })
     mod.reset()
 
     expect(() => mod.getUser('user-1')).toThrow('has no expectations configured')
@@ -82,7 +82,7 @@ describe('createMockModule', () => {
 
   it('stub with multiple args returns value when all args match', async () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: 'new-1' }))
+    mod.expects('createUser').withArgs('Bob', 25).resolves({ id: 'new-1' })
 
     const result = mod.createUser('Bob', 25)
     await expect(result).resolves.toEqual({ id: 'new-1' })
@@ -90,7 +90,7 @@ describe('createMockModule', () => {
 
   it('stub with multiple args throws when args do not match', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('createUser').withArgs('Bob', 25).returns(Promise.resolve({ id: 'new-1' }))
+    mod.expects('createUser').withArgs('Bob', 25).resolves({ id: 'new-1' })
 
     expect(() => mod.createUser('Alice', 30)).toThrow(`userService.createUser() was called with wrong arguments
 
@@ -118,11 +118,11 @@ describe('createMockModule', () => {
 + arg 0: "wrong-id"`)
   })
 
-  it('throws causes stub to throw the given error', () => {
+  it('rejects causes stub to return a rejected promise', async () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
-    mod.expects('getUser').withArgs('user-1').throws(new Error('db connection failed'))
+    mod.expects('getUser').withArgs('user-1').rejects(new Error('db connection failed'))
 
-    expect(() => mod.getUser('user-1')).toThrow('db connection failed')
+    await expect(mod.getUser('user-1')).rejects.toThrow('db connection failed')
   })
 
   it('resolves returns a resolved promise with the value', async () => {

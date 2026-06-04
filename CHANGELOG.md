@@ -3,6 +3,15 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-06-04
+### Changed
+- **BREAKING** Async functions (returning `Promise`) only expose `.resolves()`, `.rejects()`, and `.calls()` — `.returns()` and `.throws()` are no longer available
+- **BREAKING** Sync functions only expose `.returns()`, `.throws()`, and `.calls()` — `.resolves()` and `.rejects()` are no longer available
+- `ExpectationWithArgs<Fn>` is now a conditional type that resolves to `AsyncExpectationWithArgs<Fn>` or `SyncExpectationWithArgs<Fn>`
+
+### Added
+- `SyncExpectationWithArgs<Fn>` and `AsyncExpectationWithArgs<Fn>` exported types
+
 ## [3.1.2] - 2026-06-04
 ### Changed
 - Reformat all mock expectation chains to multiline style (one method per line)

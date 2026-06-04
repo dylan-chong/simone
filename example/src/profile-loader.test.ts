@@ -65,7 +65,7 @@ describe('loadProfile', () => {
     userServiceMock
       .expects('getUser')
       .withArgs({ id: 'user-1' })
-      .throws(new Error('db offline'))
+      .rejects(new Error('db offline'))
 
     await expect(loadProfile('user-1', Channel.Web)).rejects.toThrow('db offline')
   })
