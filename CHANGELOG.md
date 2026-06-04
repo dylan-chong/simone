@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [4.0.3] - 2026-06-05
+### Changed
+- README fake timers example now shows a full test case with logger mock
+
 ## [4.0.2] - 2026-06-04
 ### Added
 - README section documenting no-arg functions (`.withArgs()` still required, called with no arguments)

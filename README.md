@@ -113,14 +113,27 @@ Simone uses strict argument matching — every arg must match exactly. This mean
 
 ```ts
 import { vi } from 'vitest'
+import { mockModule } from 'simone'
+import { outputHelloMessage } from './greeter'
+
+const loggerMock = mockModule(import('./logger'))
 
 beforeEach(() => {
   vi.useFakeTimers()
-  vi.setSystemTime(new Date('2024-01-15T10:00:00Z'))
+  vi.setSystemTime(new Date('2024-01-14T10:00:00Z')) // a Tuesday
 })
 
 afterEach(() => {
   vi.useRealTimers()
+})
+
+it('outputs a hello message with the current day', () => {
+  loggerMock
+    .expects('info')
+    .withArgs('Hello Simone, happy Tuesday')
+    .returns(undefined)
+
+  outputHelloMessage('Simone')
 })
 ```
 
