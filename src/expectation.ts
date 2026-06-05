@@ -1,4 +1,3 @@
-import * as R from 'ramda'
 import { SimoneError } from './errors.js'
 
 export enum ResponseType {
@@ -44,7 +43,7 @@ class GlobalExpectationQueue {
         `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
       )
     }
-    if (!R.equals(next.args, calledArgs)) {
+    if (serialize(next.args) !== serialize(calledArgs)) {
       this.failed = true
       throw new SimoneError(
         `${fnName}() was called with wrong arguments\n\n` +
@@ -94,8 +93,8 @@ function formatArgsDiff(expected: unknown[], actual: unknown[]): string {
   const lines: string[] = []
   const maxLen = Math.max(expected.length, actual.length)
   for (const i of Array.from({ length: maxLen }, (_, idx) => idx)) {
-    const exp = i < expected.length ? stableStringify(expected[i]) : undefined
-    const act = i < actual.length ? stableStringify(actual[i]) : undefined
+    const exp = i < expected.length ? serialize(expected[i]) : undefined
+    const act = i < actual.length ? serialize(actual[i]) : undefined
     if (exp === act) {
       const prefix = `  arg ${i}: `
       lines.push(prefix + indent(act!, prefix.length))
@@ -118,19 +117,73 @@ function indent(str: string, width: number): string {
   return str.split('\n').join('\n' + pad)
 }
 
-function stableStringify(value: unknown): string {
-  const seen = new WeakSet<object>()
-  return JSON.stringify(sortKeys(value, seen), null, 2)
+function serialize(value: unknown, ancestors = new WeakSet<object>()): string {
+  if (value === undefined) return 'undefined'
+  if (value === null) return 'null'
+  if (typeof value === 'string') return JSON.stringify(value)
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (typeof value === 'bigint') return `{ __simone_type__: "BigInt", value: "${value}n" }`
+  if (typeof value === 'symbol') return `{ __simone_type__: "Symbol", description: ${JSON.stringify(value.description)} }`
+  if (typeof value === 'function') return `{ __simone_type__: "Function", source: ${JSON.stringify(value.toString())} }`
+
+  if (ancestors.has(value)) return '{ __simone_type__: "CircularRef" }'
+
+  ancestors.add(value)
+  const result = serializeObject(value, ancestors)
+  ancestors.delete(value)
+
+  return result
 }
 
-function sortKeys(value: unknown, seen: WeakSet<object>): unknown {
-  if (value === null || typeof value !== 'object') return value
-  if (seen.has(value)) return '[Circular]'
-  seen.add(value)
-  if (Array.isArray(value)) return value.map((v) => sortKeys(v, seen))
-  const sorted: Record<string, unknown> = {}
-  for (const key of Object.keys(value as Record<string, unknown>).sort()) {
-    sorted[key] = sortKeys((value as Record<string, unknown>)[key], seen)
+function serializeObject(value: object, ancestors: WeakSet<object>): string {
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]'
+    const items = value.map((v) => serialize(v, ancestors))
+    const oneLine = `[${items.join(', ')}]`
+    if (oneLine.length <= 60) return oneLine
+    return `[\n  ${items.join(',\n  ')}\n]`
   }
-  return sorted
+
+  if (value instanceof Date) {
+    return `{ __simone_type__: "Date", value: ${JSON.stringify(value.toISOString())} }`
+  }
+
+  if (value instanceof RegExp) {
+    return `{ __simone_type__: "RegExp", source: ${JSON.stringify(value.source)}, flags: ${JSON.stringify(value.flags)} }`
+  }
+
+  if (value instanceof Error) {
+    const typeLine = `__simone_type__: ${JSON.stringify(value.constructor.name)}`
+    const msgLine = `message: ${JSON.stringify(value.message)}`
+    const props = Object.keys(value)
+      .filter((k) => k !== 'stack')
+      .sort()
+      .map((k) => `${safeKey(k)}: ${serialize((value as any)[k], ancestors)}`)
+    const allEntries = [typeLine, msgLine, ...props]
+    return formatObject(allEntries)
+  }
+
+  const proto = Object.getPrototypeOf(value)
+  if (proto !== Object.prototype && proto !== null) {
+    const className = value.constructor?.name ?? 'Unknown'
+    const typeLine = `__simone_type__: ${JSON.stringify(className)}`
+    const props = Object.keys(value).sort()
+      .map((k) => `${safeKey(k)}: ${serialize((value as any)[k], ancestors)}`)
+    return formatObject([typeLine, ...props])
+  }
+
+  const entries = Object.keys(value as object).sort()
+    .map((k) => `${safeKey(k)}: ${serialize((value as Record<string, unknown>)[k], ancestors)}`)
+  return formatObject(entries)
+}
+
+function formatObject(entries: string[]): string {
+  if (entries.length === 0) return '{}'
+  const oneLine = `{ ${entries.join(', ')} }`
+  if (oneLine.length <= 60) return oneLine
+  return `{\n  ${entries.join(',\n  ')}\n}`
+}
+
+function safeKey(key: string): string {
+  return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : JSON.stringify(key)
 }

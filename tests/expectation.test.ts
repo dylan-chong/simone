@@ -65,14 +65,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.create', [{ name: 'Bob', age: 30 }])).toThrow(`mod.create() was called with wrong arguments
 
-- arg 0: {
-           "age": 30,
-           "name": "Alice"
-         }
-+ arg 0: {
-           "age": 30,
-           "name": "Bob"
-         }`)
+- arg 0: { age: 30, name: "Alice" }
++ arg 0: { age: 30, name: "Bob" }`)
   })
 
   it('matches nested objects', () => {
@@ -86,20 +80,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ a: { b: { c: 2 } } }])).toThrow(`mod.fn() was called with wrong arguments
 
-- arg 0: {
-           "a": {
-             "b": {
-               "c": 1
-             }
-           }
-         }
-+ arg 0: {
-           "a": {
-             "b": {
-               "c": 2
-             }
-           }
-         }`)
+- arg 0: { a: { b: { c: 1 } } }
++ arg 0: { a: { b: { c: 2 } } }`)
   })
 
   it('matches arrays', () => {
@@ -113,15 +95,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [[1, 2]])).toThrow(`mod.fn() was called with wrong arguments
 
-- arg 0: [
-           1,
-           2,
-           3
-         ]
-+ arg 0: [
-           1,
-           2
-         ]`)
+- arg 0: [1, 2, 3]
++ arg 0: [1, 2]`)
   })
 
   it('rejects arrays with different values', () => {
@@ -129,16 +104,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [[1, 2, 4]])).toThrow(`mod.fn() was called with wrong arguments
 
-- arg 0: [
-           1,
-           2,
-           3
-         ]
-+ arg 0: [
-           1,
-           2,
-           4
-         ]`)
+- arg 0: [1, 2, 3]
++ arg 0: [1, 2, 4]`)
   })
 
   it('distinguishes null from objects', () => {
@@ -155,14 +122,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ 0: 1, 1: 2 }])).toThrow(`mod.fn() was called with wrong arguments
 
-- arg 0: [
-           1,
-           2
-         ]
-+ arg 0: {
-           "0": 1,
-           "1": 2
-         }`)
+- arg 0: [1, 2]
++ arg 0: { "0": 1, "1": 2 }`)
   })
 
   it('matches primitives by value', () => {
@@ -176,13 +137,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ a: 1, b: 2 }])).toThrow(`mod.fn() was called with wrong arguments
 
-- arg 0: {
-           "a": 1
-         }
-+ arg 0: {
-           "a": 1,
-           "b": 2
-         }`)
+- arg 0: { a: 1 }
++ arg 0: { a: 1, b: 2 }`)
   })
 
   it('rejects objects with missing keys', () => {
@@ -190,13 +146,8 @@ describe('globalQueue', () => {
 
     expect(() => globalQueue.consume('mod.fn', [{ a: 1 }])).toThrow(`mod.fn() was called with wrong arguments
 
-- arg 0: {
-           "a": 1,
-           "b": 2
-         }
-+ arg 0: {
-           "a": 1
-         }`)
+- arg 0: { a: 1, b: 2 }
++ arg 0: { a: 1 }`)
   })
 
   it('getUnconsumed returns remaining expectations', () => {
@@ -341,34 +292,28 @@ describe('globalQueue', () => {
 
   arg 0: "user-1"
 - arg 1: {
-           "address": {
-             "city": "Springfield",
-             "state": "IL",
-             "street": "123 Main St",
-             "zip": "62701"
-           },
-           "age": 30,
-           "id": "user-1",
-           "name": "Alice",
-           "tags": [
-             "admin",
-             "active"
-           ]
+           address: {
+           city: "Springfield",
+           state: "IL",
+           street: "123 Main St",
+           zip: "62701"
+         },
+           age: 30,
+           id: "user-1",
+           name: "Alice",
+           tags: ["admin", "active"]
          }
 + arg 1: {
-           "address": {
-             "city": "Springfield",
-             "state": "IL",
-             "street": "456 Oak Ave",
-             "zip": "62702"
-           },
-           "age": 30,
-           "id": "user-1",
-           "name": "Alice",
-           "tags": [
-             "admin",
-             "active"
-           ]
+           address: {
+           city: "Springfield",
+           state: "IL",
+           street: "456 Oak Ave",
+           zip: "62702"
+         },
+           age: 30,
+           id: "user-1",
+           name: "Alice",
+           tags: ["admin", "active"]
          }`)
   })
 
@@ -394,71 +339,36 @@ describe('globalQueue', () => {
 
   arg 0: "shop-1"
 - arg 1: {
-           "customer": {
-             "id": "user-1",
-             "name": "Alice"
-           },
-           "items": [
-             {
-               "price": 9.99,
-               "qty": 2,
-               "sku": "WIDGET-A"
-             },
-             {
-               "price": 24.5,
-               "qty": 1,
-               "sku": "GADGET-B"
-             }
-           ],
-           "metadata": {
-             "campaign": null,
-             "source": "web"
-           },
-           "orderId": "order-99"
+           customer: { id: "user-1", name: "Alice" },
+           items: [
+           { price: 9.99, qty: 2, sku: "WIDGET-A" },
+           { price: 24.5, qty: 1, sku: "GADGET-B" }
+         ],
+           metadata: { campaign: null, source: "web" },
+           orderId: "order-99"
          }
 + arg 1: {
-           "customer": {
-             "id": "user-1",
-             "name": "Alice"
-           },
-           "items": [
-             {
-               "price": 9.99,
-               "qty": 5,
-               "sku": "WIDGET-A"
-             },
-             {
-               "price": 24.5,
-               "qty": 1,
-               "sku": "GADGET-B"
-             },
-             {
-               "price": 4,
-               "qty": 1,
-               "sku": "EXTRA-C"
-             }
-           ],
-           "metadata": {
-             "campaign": null,
-             "source": "web"
-           },
-           "orderId": "order-99"
+           customer: { id: "user-1", name: "Alice" },
+           items: [
+           { price: 9.99, qty: 5, sku: "WIDGET-A" },
+           { price: 24.5, qty: 1, sku: "GADGET-B" },
+           { price: 4, qty: 1, sku: "EXTRA-C" }
+         ],
+           metadata: { campaign: null, source: "web" },
+           orderId: "order-99"
          }
   arg 2: true
   arg 3: {
-           "address": {
-             "city": "Springfield",
-             "state": "IL",
-             "street": "123 Main St",
-             "zip": "62701"
-           },
-           "age": 30,
-           "id": "user-1",
-           "name": "Alice",
-           "tags": [
-             "admin",
-             "active"
-           ]
+           address: {
+           city: "Springfield",
+           state: "IL",
+           street: "123 Main St",
+           zip: "62701"
+         },
+           age: 30,
+           id: "user-1",
+           name: "Alice",
+           tags: ["admin", "active"]
          }
   arg 4: 42`
     )
@@ -475,42 +385,30 @@ describe('globalQueue', () => {
       `mod.sync() was called with wrong arguments
 
   arg 0: {
-           "database": {
-             "credentials": {
-               "password": "secret",
-               "username": "admin"
-             },
-             "host": "localhost",
-             "port": 5432
-           },
-           "features": {
-             "flags": [
-               "dark-mode",
-               "beta-ui"
-             ],
-             "limits": {
-               "maxRetries": 3,
-               "timeout": 5000
-             }
-           }
+           database: {
+           credentials: { password: "secret", username: "admin" },
+           host: "localhost",
+           port: 5432
+         },
+           features: {
+           flags: ["dark-mode", "beta-ui"],
+           limits: { maxRetries: 3, timeout: 5000 }
+         }
          }
 - arg 1: "production"
 + arg 1: "staging"
   arg 2: 3
   arg 3: {
-           "address": {
-             "city": "Springfield",
-             "state": "IL",
-             "street": "123 Main St",
-             "zip": "62701"
-           },
-           "age": 30,
-           "id": "user-1",
-           "name": "Alice",
-           "tags": [
-             "admin",
-             "active"
-           ]
+           address: {
+           city: "Springfield",
+           state: "IL",
+           street: "123 Main St",
+           zip: "62701"
+         },
+           age: 30,
+           id: "user-1",
+           name: "Alice",
+           tags: ["admin", "active"]
          }`
     )
   })
@@ -528,43 +426,26 @@ describe('globalQueue', () => {
   arg 0: "tenant-1"
   arg 1: true
 - arg 2: {
-           "database": {
-             "credentials": {
-               "password": "secret",
-               "username": "admin"
-             },
-             "host": "localhost",
-             "port": 5432
-           },
-           "features": {
-             "flags": [
-               "dark-mode",
-               "beta-ui"
-             ],
-             "limits": {
-               "maxRetries": 3,
-               "timeout": 5000
-             }
-           }
+           database: {
+           credentials: { password: "secret", username: "admin" },
+           host: "localhost",
+           port: 5432
+         },
+           features: {
+           flags: ["dark-mode", "beta-ui"],
+           limits: { maxRetries: 3, timeout: 5000 }
+         }
          }
 + arg 2: {
-           "database": {
-             "credentials": {
-               "password": "changed",
-               "username": "admin"
-             },
-             "host": "localhost",
-             "port": 5432
-           },
-           "features": {
-             "flags": [
-               "dark-mode"
-             ],
-             "limits": {
-               "maxRetries": 5,
-               "timeout": 5000
-             }
-           }
+           database: {
+           credentials: { password: "changed", username: "admin" },
+           host: "localhost",
+           port: 5432
+         },
+           features: {
+           flags: ["dark-mode"],
+           limits: { maxRetries: 5, timeout: 5000 }
+         }
          }`
     )
   })
@@ -579,7 +460,7 @@ describe('globalQueue', () => {
       response: { type: ResponseType.return, value: 'ok' },
     })
 
-    expect(() => globalQueue.consume('mod.fn', [circular])).toThrow('[Circular]')
+    expect(() => globalQueue.consume('mod.fn', [circular])).toThrow('CircularRef')
   })
 
   it('diff normalizes key order so only value differences are visible', () => {
@@ -592,16 +473,187 @@ describe('globalQueue', () => {
     expect(() => globalQueue.consume('mod.fn', [{ m: 'world', z: 1, a: 2 }])).toThrow(
       `mod.fn() was called with wrong arguments
 
-- arg 0: {
-           "a": 2,
-           "m": "hello",
-           "z": 1
-         }
-+ arg 0: {
-           "a": 2,
-           "m": "world",
-           "z": 1
-         }`
+- arg 0: { a: 2, m: "hello", z: 1 }
++ arg 0: { a: 2, m: "world", z: 1 }`
     )
+  })
+
+  it('matches Date objects by value', () => {
+    const date = new Date('2024-01-15T10:00:00.000Z')
+    globalQueue.add({ fnName: 'mod.fn', args: [date], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [new Date('2024-01-15T10:00:00.000Z')])).toBe('ok')
+  })
+
+  it('rejects Date objects with different values', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [new Date('2024-01-15T10:00:00.000Z')], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [new Date('2024-01-16T10:00:00.000Z')])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('matches RegExp objects by source and flags', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [/hello/gi], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [/hello/gi])).toBe('ok')
+  })
+
+  it('rejects RegExp objects with different flags', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [/hello/gi], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [/hello/g])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('matches functions by toString source', () => {
+    const fn = (x: number) => x + 1
+    globalQueue.add({ fnName: 'mod.fn', args: [fn], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [fn])).toBe('ok')
+  })
+
+  it('rejects different functions', () => {
+    const fn1 = (x: number) => x + 1
+    const fn2 = (x: number) => x + 2
+    globalQueue.add({ fnName: 'mod.fn', args: [fn1], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [fn2])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('matches undefined args', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [undefined], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [undefined])).toBe('ok')
+  })
+
+  it('distinguishes undefined from null', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [undefined], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [null])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('matches custom class instances by all own properties', () => {
+    class Point {
+      constructor(public x: number, public y: number) {}
+    }
+    globalQueue.add({ fnName: 'mod.fn', args: [new Point(1, 2)], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [new Point(1, 2)])).toBe('ok')
+  })
+
+  it('rejects custom class instances with different properties', () => {
+    class Point {
+      constructor(public x: number, public y: number) {}
+    }
+    globalQueue.add({ fnName: 'mod.fn', args: [new Point(1, 2)], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [new Point(1, 3)])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('includes class name in serialization for custom classes', () => {
+    class MyService {
+      constructor(public host: string) {}
+    }
+    globalQueue.add({ fnName: 'mod.fn', args: [{ name: 'x' }], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [new MyService('localhost')])).toThrow(
+      '__simone_type__: "MyService"'
+    )
+  })
+
+  it('compares Error instances by type and message, ignoring stack', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [new Error('fail')], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [new Error('fail')])).toBe('ok')
+  })
+
+  it('rejects Error instances with different messages', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [new Error('fail')], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [new Error('other')])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('compares custom Error subclass properties', () => {
+    class DbError extends Error {
+      constructor(public code: string, message: string) {
+        super(message)
+        this.name = 'DbError'
+      }
+    }
+    globalQueue.add({ fnName: 'mod.fn', args: [new DbError('E1', 'fail')], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [new DbError('E1', 'fail')])).toBe('ok')
+  })
+
+  it('rejects custom Error with different custom property', () => {
+    class DbError extends Error {
+      constructor(public code: string, message: string) {
+        super(message)
+        this.name = 'DbError'
+      }
+    }
+    globalQueue.add({ fnName: 'mod.fn', args: [new DbError('E1', 'fail')], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [new DbError('E2', 'fail')])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('matches BigInt values', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [BigInt(123)], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [BigInt(123)])).toBe('ok')
+  })
+
+  it('rejects different BigInt values', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [BigInt(123)], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [BigInt(456)])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('matches Symbol values by description', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [Symbol.for('test')], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [Symbol.for('test')])).toBe('ok')
+  })
+
+  it('rejects Symbols with different descriptions', () => {
+    globalQueue.add({ fnName: 'mod.fn', args: [Symbol.for('a')], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [Symbol.for('b')])).toThrow(
+      'mod.fn() was called with wrong arguments'
+    )
+  })
+
+  it('handles objects with non-standard prototype and no constructor', () => {
+    const proto = { custom: true }
+    const obj = Object.create(proto)
+    obj.x = 1
+    Object.defineProperty(obj, 'constructor', { value: undefined, enumerable: false })
+    globalQueue.add({ fnName: 'mod.fn', args: [{ x: 2 }], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(() => globalQueue.consume('mod.fn', [obj])).toThrow(
+      '__simone_type__: "Unknown"'
+    )
+  })
+
+  it('shared reference in siblings is not treated as circular', () => {
+    const shared = { id: 'shared' }
+    const obj = { a: shared, b: shared }
+    globalQueue.add({ fnName: 'mod.fn', args: [obj], response: { type: ResponseType.return, value: 'ok' } })
+
+    expect(globalQueue.consume('mod.fn', [{ a: { id: 'shared' }, b: { id: 'shared' } }])).toBe('ok')
   })
 })
