@@ -1,7 +1,7 @@
 import type { Profile } from './types'
 import { Channel } from './types'
 import { getUser, deleteUser } from './user-service'
-import { getEmailPreferences, logEmailEvent } from './email-service'
+import { getEmailPreferences, logEmailEvent, logError } from './email-service'
 
 export async function loadProfile(id: string, channel: Channel): Promise<Profile> {
   const user = await getUser({ id })
@@ -12,4 +12,13 @@ export async function loadProfile(id: string, channel: Channel): Promise<Profile
 export async function deleteProfile(id: string): Promise<void> {
   logEmailEvent(`profile-deleted:${id}`)
   await deleteUser({ id })
+}
+
+export async function loadProfileSafe(id: string, channel: Channel): Promise<Profile | null> {
+  try {
+    return await loadProfile(id, channel)
+  } catch (error) {
+    logError(error as Error)
+    return null
+  }
 }

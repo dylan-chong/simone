@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mockModule } from '../../src/index'
 import { Channel } from './types'
-import { loadProfile, deleteProfile } from './profile-loader'
+import { loadProfile, deleteProfile, loadProfileSafe } from './profile-loader'
 
 const userServiceMock = mockModule(import('./user-service'))
 const emailServiceMock = mockModule(import('./email-service'))
@@ -124,5 +124,21 @@ describe('deleteProfile', () => {
       .resolves(undefined)
 
     await deleteProfile('user-1')
+  })
+})
+
+describe('loadProfileSafe', () => {
+  it('logs the exact error when user service fails', async () => {
+    userServiceMock
+      .expects('getUser')
+      .withArgs({ id: 'user-1' })
+      .rejects(new Error('connection refused'))
+    emailServiceMock
+      .expects('logError')
+      .withArgs(new Error('connection refused'))
+      .returns(undefined)
+
+    const result = await loadProfileSafe('user-1', Channel.Web)
+    expect(result).toBeNull()
   })
 })

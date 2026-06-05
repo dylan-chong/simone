@@ -569,6 +569,19 @@ describe('globalQueue', () => {
     )
   })
 
+  it('diff shows [Circular] for circular references', () => {
+    const circular: any = { name: 'root' }
+    circular.self = circular
+
+    globalQueue.add({
+      fnName: 'mod.fn',
+      args: [{ name: 'other' }],
+      response: { type: ResponseType.return, value: 'ok' },
+    })
+
+    expect(() => globalQueue.consume('mod.fn', [circular])).toThrow('[Circular]')
+  })
+
   it('diff normalizes key order so only value differences are visible', () => {
     globalQueue.add({
       fnName: 'mod.fn',

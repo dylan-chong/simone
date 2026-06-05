@@ -11,3 +11,7 @@ export async function getEmailPreferences(query: EmailQuery): Promise<EmailPrefe
 export function logEmailEvent(event: string): void {
   throw new Error('real implementation — writes to event log')
 }
+
+export function logError(error: Error): void {
+  throw new Error('real implementation — writes to error log')
+}
