@@ -4,7 +4,9 @@ Typed mock expectations for Vitest. Sinon-style API with full TypeScript inferen
 
 Opinionated towards a semi-functional style where you mock exported functions on a module. OOP-style mocks (classes, instances, method stubs) are not supported.
 
-Intentionally restrictive — strict argument matching and global call ordering force LLMs (and humans) to write precise, deterministic tests instead of loose assertions that pass accidentally. Because of this, Claude can get desperate, so it'll need guidance on how to write tests properly.
+Intentionally restrictive — strict argument matching and global call ordering force LLMs (and humans) to write precise, deterministic tests instead of loose assertions that pass accidentally - Claude really likes to do this. Because of this, Claude can get desperate, so it'll need guidance on how to write tests properly.
+
+Note that because of the restrictiveness, you will have to alter how your modules are structured in some cases to allow for precise mocking to be possible. Read the rest of this README for examples.
 
 ## Install
 

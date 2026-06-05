@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mockModule } from '../../src/index'
-import { Channel } from './types'
+import { Channel, DatabaseError } from './types'
 import { loadProfile, deleteProfile, loadProfileSafe } from './profile-loader'
 
 const userServiceMock = mockModule(import('./user-service'))
@@ -136,6 +136,20 @@ describe('loadProfileSafe', () => {
     emailServiceMock
       .expects('logError')
       .withArgs(new Error('connection refused'))
+      .returns(undefined)
+
+    const result = await loadProfileSafe('user-1', Channel.Web)
+    expect(result).toBeNull()
+  })
+
+  it('logs a DatabaseError with code and message', async () => {
+    userServiceMock
+      .expects('getUser')
+      .withArgs({ id: 'user-1' })
+      .rejects(new DatabaseError('ECONNRESET', 'connection reset by peer'))
+    emailServiceMock
+      .expects('logError')
+      .withArgs(new DatabaseError('ECONNRESET', 'connection reset by peer'))
       .returns(undefined)
 
     const result = await loadProfileSafe('user-1', Channel.Web)

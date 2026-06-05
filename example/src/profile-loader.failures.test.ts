@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mockModule } from '../../src/index'
-import { Channel } from './types'
-import { loadProfile, deleteProfile } from './profile-loader'
+import { Channel, DatabaseError } from './types'
+import { loadProfile, deleteProfile, loadProfileSafe } from './profile-loader'
 
 const userServiceMock = mockModule(import('./user-service'))
 const emailServiceMock = mockModule(import('./email-service'))
@@ -68,5 +68,46 @@ describe('deleteProfile — expected failures', () => {
       .resolves(undefined)
 
     await deleteProfile('user-1')
+  })
+})
+
+describe('loadProfileSafe — expected failures', () => {
+  it.fails('expects wrong error type (Error instead of DatabaseError)', async () => {
+    userServiceMock
+      .expects('getUser')
+      .withArgs({ id: 'user-1' })
+      .rejects(new DatabaseError('ECONNRESET', 'connection reset by peer'))
+    emailServiceMock
+      .expects('logError')
+      .withArgs(new Error('connection reset by peer'))
+      .returns(undefined)
+
+    await loadProfileSafe('user-1', Channel.Web)
+  })
+
+  it.fails('expects wrong error message', async () => {
+    userServiceMock
+      .expects('getUser')
+      .withArgs({ id: 'user-1' })
+      .rejects(new DatabaseError('ECONNRESET', 'connection reset by peer'))
+    emailServiceMock
+      .expects('logError')
+      .withArgs(new DatabaseError('ECONNRESET', 'timeout'))
+      .returns(undefined)
+
+    await loadProfileSafe('user-1', Channel.Web)
+  })
+
+  it.fails('expects wrong error code', async () => {
+    userServiceMock
+      .expects('getUser')
+      .withArgs({ id: 'user-1' })
+      .rejects(new DatabaseError('ECONNRESET', 'connection reset by peer'))
+    emailServiceMock
+      .expects('logError')
+      .withArgs(new DatabaseError('ETIMEDOUT', 'connection reset by peer'))
+      .returns(undefined)
+
+    await loadProfileSafe('user-1', Channel.Web)
   })
 })

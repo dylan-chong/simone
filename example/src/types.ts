@@ -48,3 +48,10 @@ export interface Profile extends User {
   emailPrefs: EmailPreferences
   loadedAt: number
 }
+
+export class DatabaseError extends Error {
+  constructor(public readonly code: string, message: string) {
+    super(message)
+    this.name = 'DatabaseError'
+  }
+}
