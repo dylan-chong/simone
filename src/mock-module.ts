@@ -46,13 +46,16 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
   } as MockModuleInternal<Module>
 
   for (const name of functionNames) {
-    (mod as any)[name] = (...args: unknown[]) => {
+    const stub = (...args: unknown[]) => {
       if (!configuredFns.has(name)) {
         globalQueue.markFailed()
-        throw new SimoneError(`${moduleName}.${name}() was called but has no expectations configured`)
+        const error = new SimoneError(`${moduleName}.${name}() was called but has no expectations configured`)
+        Error.captureStackTrace(error, stub)
+        throw error
       }
-      return globalQueue.consume(`${moduleName}.${name}`, args)
-    }
+      return globalQueue.consume(`${moduleName}.${name}`, args, stub)
+    };
+    (mod as any)[name] = stub
   }
 
   registry.register(mod)

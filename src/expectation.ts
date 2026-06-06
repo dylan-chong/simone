@@ -1,5 +1,11 @@
 import { SimoneError } from './errors.js'
 
+declare global {
+  interface ErrorConstructor {
+    captureStackTrace(error: Error, caller?: Function): void
+  }
+}
+
 export enum ResponseType {
   return = 'return',
   throw = 'throw',
@@ -28,26 +34,29 @@ export class ExpectationQueue {
     this.queue.push(expectation)
   }
 
-  consume(fnName: string, calledArgs: unknown[]): unknown {
+  consume(fnName: string, calledArgs: unknown[], caller?: Function): unknown {
     if (this.consumedCount >= this.queue.length) {
       this.failed = true
-      throw new SimoneError(
-        `${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`
+      throw this.createError(
+        `${fnName}(${formatArgs(calledArgs)}) was called but no expectations remain`,
+        caller
       )
     }
 
     const next = this.queue[this.consumedCount]
     if (next.fnName !== fnName) {
       this.failed = true
-      throw new SimoneError(
-        `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`
+      throw this.createError(
+        `expected ${next.fnName}(${formatArgs(next.args)}) to be called next, but ${fnName}(${formatArgs(calledArgs)}) was called`,
+        caller
       )
     }
     if (serialize(next.args) !== serialize(calledArgs)) {
       this.failed = true
-      throw new SimoneError(
+      throw this.createError(
         `${fnName}() was called with wrong arguments\n\n` +
-        formatArgsDiff(next.args, calledArgs)
+        formatArgsDiff(next.args, calledArgs),
+        caller
       )
     }
 
@@ -62,6 +71,13 @@ export class ExpectationQueue {
       return next.response.fn(...calledArgs)
     }
     return next.response.value
+  }
+
+  private createError(message: string, caller?: Function): SimoneError {
+    const suffix = `\n\nafter ${this.consumedCount} successful mock ${this.consumedCount === 1 ? 'call' : 'calls'}`
+    const error = new SimoneError(message + suffix)
+    if (caller) Error.captureStackTrace(error, caller)
+    return error
   }
 
   getUnconsumed(): QueuedExpectation[] {

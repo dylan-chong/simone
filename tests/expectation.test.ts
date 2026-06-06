@@ -55,6 +55,37 @@ describe('globalQueue', () => {
     )
   })
 
+  it('includes successful call count in error message', () => {
+    globalQueue.add({ fnName: 'mod.a', args: [], response: { type: ResponseType.return, value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.b', args: [], response: { type: ResponseType.return, value: 'ok' } })
+    globalQueue.consume('mod.a', [])
+
+    expect(() => globalQueue.consume('mod.wrong', [])).toThrow('after 1 successful mock call')
+  })
+
+  it('pluralises call count in error message', () => {
+    globalQueue.add({ fnName: 'mod.a', args: [], response: { type: ResponseType.return, value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.b', args: [], response: { type: ResponseType.return, value: 'ok' } })
+    globalQueue.add({ fnName: 'mod.c', args: [], response: { type: ResponseType.return, value: 'ok' } })
+    globalQueue.consume('mod.a', [])
+    globalQueue.consume('mod.b', [])
+
+    expect(() => globalQueue.consume('mod.wrong', [])).toThrow('after 2 successful mock calls')
+  })
+
+  it('trims stack trace when caller is provided', () => {
+    function myCaller() {
+      return globalQueue.consume('mod.fn', ['x'], myCaller)
+    }
+    globalQueue.add({ fnName: 'mod.fn', args: ['y'], response: { type: ResponseType.return, value: 'ok' } })
+
+    try {
+      myCaller()
+    } catch (e: any) {
+      expect(e.stack).not.toContain('myCaller')
+    }
+  })
+
   it('matches deep-equal objects', () => {
     globalQueue.add({ fnName: 'mod.create', args: [{ name: 'Alice', age: 30 }], response: { type: ResponseType.return, value: 'ok' } })
 
