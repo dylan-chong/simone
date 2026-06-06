@@ -1,12 +1,14 @@
-import { globalQueue } from './expectation.js'
+import type { ExpectationQueue } from './expectation.js'
 import { SimoneError, SimoneAlreadyFailedError } from './errors.js'
 
 export interface Resettable {
   reset(): void
 }
 
-class Registry {
+export class Registry {
   private modules = new Set<Resettable>()
+
+  constructor(private queue: ExpectationQueue) {}
 
   register(mod: Resettable): void {
     this.modules.add(mod)
@@ -17,10 +19,10 @@ class Registry {
   }
 
   verifyAll(): void {
-    if (globalQueue.hasFailed()) {
+    if (this.queue.hasFailed()) {
       throw new SimoneAlreadyFailedError()
     }
-    const unconsumed = globalQueue.getUnconsumed()
+    const unconsumed = this.queue.getUnconsumed()
     if (unconsumed.length > 0) {
       const details = unconsumed
         .map((e) => `  - ${e.fnName}(${e.args.map((a) => JSON.stringify(a)).join(', ')})`)
@@ -30,7 +32,7 @@ class Registry {
   }
 
   resetAll(): void {
-    globalQueue.reset()
+    this.queue.reset()
     for (const mod of this.modules) {
       mod.reset()
     }
@@ -38,8 +40,6 @@ class Registry {
 
   clear(): void {
     this.modules.clear()
-    globalQueue.reset()
+    this.queue.reset()
   }
 }
-
-export const registry = new Registry()

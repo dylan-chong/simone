@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { registry } from '../src/registry'
-import { globalQueue, ResponseType } from '../src/expectation'
+import { globalQueue, registry } from '../src/globals'
+import { ResponseType } from '../src/expectation'
 
 describe('registry', () => {
   beforeEach(() => {

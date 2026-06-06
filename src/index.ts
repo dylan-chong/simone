@@ -1,4 +1,4 @@
-import { registry } from './registry.js'
+import { registry } from './globals.js'
 import { SimoneError } from './errors.js'
 import type { MockModuleInstance } from './types.js'
 

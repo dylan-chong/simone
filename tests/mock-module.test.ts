@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createMockModule } from '../src/mock-module'
-import { registry } from '../src/registry'
-import { globalQueue } from '../src/expectation'
+import { globalQueue, registry } from '../src/globals'
 
 type UserService = typeof import('./fixtures/user-service')
 

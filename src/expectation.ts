@@ -19,7 +19,7 @@ interface QueuedExpectation {
   response: Response
 }
 
-class GlobalExpectationQueue {
+export class ExpectationQueue {
   private queue: QueuedExpectation[] = []
   private consumedCount = 0
   private failed = false
@@ -83,7 +83,6 @@ class GlobalExpectationQueue {
   }
 }
 
-export const globalQueue = new GlobalExpectationQueue()
 
 function formatArgs(args: unknown[]): string {
   return args.map((a) => JSON.stringify(a)).join(', ')

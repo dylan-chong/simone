@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { globalQueue, ResponseType } from '../src/expectation'
+import { ResponseType } from '../src/expectation'
+import { globalQueue } from '../src/globals'
 import {
   userWithAddress,
   userWithDifferentAddress,
