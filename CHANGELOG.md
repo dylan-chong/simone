@@ -3,6 +3,20 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-06-06
+### Changed
+- **BREAKING** Deep equality now uses custom serialization instead of `R.equals` — correctly compares custom Error properties (code, name), Date by ISO value, RegExp by source/flags, class instances by all own enumerable props
+- **BREAKING** `ramda` removed as runtime dependency (zero deps now)
+- **BREAKING** Diff output uses JS notation (unquoted keys, compact single-line for short objects) instead of JSON
+- **BREAKING** Async functions only expose `.resolves()`, `.rejects()`, `.calls()` — `.returns()` and `.throws()` are compile errors
+- **BREAKING** Sync functions only expose `.returns()`, `.throws()`, `.calls()` — `.resolves()` and `.rejects()` are compile errors
+- Error comparison skips `stack` (two `new Error('msg')` match regardless of call site)
+- Mutable state extracted to `src/globals.ts` — all other modules are stateless
+
+### Added
+- DatabaseError example with failure tests for wrong type/message/code
+- Tests for Date, RegExp, BigInt, Symbol, Function, circular ref, custom class comparison
+
 ## [4.0.3] - 2026-06-05
 ### Changed
 - README fake timers example now shows a full test case with logger mock
