@@ -1,4 +1,5 @@
 import { SimoneError } from './errors.js'
+import { isMatchFn } from './match.js'
 
 declare global {
   interface ErrorConstructor {
@@ -31,6 +32,12 @@ export class ExpectationQueue {
   private failed = false
 
   add(expectation: QueuedExpectation): void {
+    if (expectation.response.type !== ResponseType.callback && expectation.args.some(isMatchFn)) {
+      throw new SimoneError(
+        `${expectation.fnName}: match.fn() can only be used with .calls() — ` +
+        `the matched function must be invoked and its effect asserted, not just returned or thrown.`
+      )
+    }
     this.queue.push(expectation)
   }
 
@@ -51,7 +58,7 @@ export class ExpectationQueue {
         caller
       )
     }
-    if (serialize(next.args) !== serialize(calledArgs)) {
+    if (!argsMatch(next.args, calledArgs)) {
       this.failed = true
       throw this.createError(
         `${fnName}() was called with wrong arguments\n\n` +
@@ -100,6 +107,11 @@ export class ExpectationQueue {
 }
 
 
+function argsMatch(expected: unknown[], actual: unknown[]): boolean {
+  if (expected.length !== actual.length) return false
+  return expected.every((exp, i) => isMatchFn(exp) || serialize(exp) === serialize(actual[i]))
+}
+
 function formatArgs(args: unknown[]): string {
   return args.map((a) => JSON.stringify(a)).join(', ')
 }
@@ -108,6 +120,11 @@ function formatArgsDiff(expected: unknown[], actual: unknown[]): string {
   const lines: string[] = []
   const maxLen = Math.max(expected.length, actual.length)
   for (const i of Array.from({ length: maxLen }, (_, idx) => idx)) {
+    if (i < expected.length && i < actual.length && isMatchFn(expected[i])) {
+      const prefix = `  arg ${i}: `
+      lines.push(prefix + indent('{ __simone_type__: "MatchFn" }', prefix.length))
+      continue
+    }
     const exp = i < expected.length ? serialize(expected[i]) : undefined
     const act = i < actual.length ? serialize(actual[i]) : undefined
     if (exp === act) {

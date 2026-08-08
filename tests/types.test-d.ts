@@ -1,5 +1,6 @@
 import { expectTypeOf, test } from 'vitest'
 import type { FunctionKeys, MockedModule, MockModuleInstance, Expectation, ExpectationWithArgs, SyncExpectationWithArgs, AsyncExpectationWithArgs } from '../src/types'
+import { match } from '../src/match'
 
 // Test module with mixed exports
 type TestModule = {
@@ -81,6 +82,15 @@ test('withArgs enforces correct argument types from module', () => {
 test('calls enforces correct function signature', () => {
   type EWA = AsyncExpectationWithArgs<TestModule['getUser']>
   expectTypeOf<EWA['calls']>().parameter(0).toEqualTypeOf<TestModule['getUser']>()
+})
+
+test('match.fn() is assignable to a function-typed withArgs slot', () => {
+  type Callback = (result: string) => void
+  expectTypeOf(match.fn<Callback>()).toEqualTypeOf<Callback>()
+
+  type ModuleWithCallback = { withCallback: (id: string, cb: Callback) => void }
+  type E = Expectation<ModuleWithCallback['withCallback']>
+  expectTypeOf<E['withArgs']>().parameters.toEqualTypeOf<[id: string, cb: Callback]>()
 })
 
 test('MockModuleInstance has both expects and callable function stubs', () => {

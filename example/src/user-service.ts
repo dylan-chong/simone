@@ -11,3 +11,7 @@ export async function createUser(request: CreateUserRequest): Promise<CreateUser
 export async function deleteUser(query: UserQuery): Promise<void> {
   throw new Error('real implementation — hits database')
 }
+
+export function watchUser(id: string, onChange: (user: User) => void): void {
+  throw new Error('real implementation — subscribes to a change stream')
+}

@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest'
-import { mockModule } from '../../src/index'
+import { describe, it, expect, vi } from 'vitest'
+import { mockModule, match } from '../../src/index'
 import { Channel, DatabaseError } from './types'
-import { loadProfile, deleteProfile, loadProfileSafe } from './profile-loader'
+import { loadProfile, deleteProfile, loadProfileSafe, watchProfileName } from './profile-loader'
 
 const userServiceMock = mockModule(import('./user-service'))
 const emailServiceMock = mockModule(import('./email-service'))
@@ -154,5 +154,21 @@ describe('loadProfileSafe', () => {
 
     const result = await loadProfileSafe('user-1', Channel.Web)
     expect(result).toBeNull()
+  })
+})
+
+describe('watchProfileName', () => {
+  it('invokes onNameChange with the updated user name', () => {
+    userServiceMock
+      .expects('watchUser')
+      .withArgs('user-1', match.fn())
+      .calls((id, onChange) => {
+        onChange({ id, name: 'Updated Name' })
+      })
+
+    const onNameChange = vi.fn()
+    watchProfileName('user-1', onNameChange)
+
+    expect(onNameChange).toHaveBeenCalledWith('Updated Name')
   })
 })

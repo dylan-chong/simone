@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [5.1.0] - 2026-08-08
+### Added
+- `match.fn()` — placeholder for a `withArgs()` slot whose value can't be predicted (e.g. a dynamically-generated callback). Skips strict matching for that slot only; the real value is still forwarded to `.calls()` so the test must invoke it and assert on the effect. Only valid with `.calls()` — throws if paired with `.returns()`/`.throws()`/`.resolves()`/`.rejects()`.
+
 ## [5.0.0] - 2026-06-06
 ### Changed
 - **BREAKING** Deep equality now uses custom serialization instead of `R.equals` — correctly compares custom Error properties (code, name), Date by ISO value, RegExp by source/flags, class instances by all own enumerable props

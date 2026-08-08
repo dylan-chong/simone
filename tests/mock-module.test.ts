@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createMockModule } from '../src/mock-module'
 import { globalQueue, registry } from '../src/globals'
+import { match } from '../src/match'
 
 type UserService = typeof import('./fixtures/user-service')
 
@@ -142,5 +143,35 @@ describe('createMockModule', () => {
   it('registers itself in the global registry', () => {
     const mod = createMockModule<UserService>('userService', ['getUser', 'createUser'])
     expect(registry.getAll()).toContain(mod)
+  })
+
+  it('match.fn() skips matching for that slot and passes the real value to calls()', () => {
+    const mod = createMockModule<UserService>('userService', ['withCallback'])
+    let received: string | undefined
+    const realCallback = (result: string) => { received = result }
+
+    mod.expects('withCallback').withArgs('user-1', match.fn()).calls((id, cb) => {
+      cb('dynamic-result')
+    })
+
+    mod.withCallback('user-1', realCallback)
+    expect(received).toBe('dynamic-result')
+  })
+
+  it('match.fn() still enforces matching on non-matched slots', () => {
+    const mod = createMockModule<UserService>('userService', ['withCallback'])
+    mod.expects('withCallback').withArgs('user-1', match.fn()).calls(() => {})
+
+    expect(() => mod.withCallback('wrong-id', () => {})).toThrow(
+      `userService.withCallback() was called with wrong arguments`
+    )
+  })
+
+  it('match.fn() throws when used with returns() instead of calls()', () => {
+    const mod = createMockModule<UserService>('userService', ['withCallback'])
+
+    expect(() =>
+      mod.expects('withCallback').withArgs('user-1', match.fn()).returns(undefined)
+    ).toThrow('match.fn() can only be used with .calls()')
   })
 })

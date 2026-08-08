@@ -23,6 +23,13 @@ describe('globalQueue', () => {
     expect(result).toBe('Alice')
   })
 
+  it('matches when an argument value is an empty array', () => {
+    globalQueue.add({ fnName: 'mod.setTags', args: [[]], response: { type: ResponseType.return, value: 'ok' } })
+
+    const result = globalQueue.consume('mod.setTags', [[]])
+    expect(result).toBe('ok')
+  })
+
   it('enforces ordering — throws if wrong fn is called', () => {
     globalQueue.add({ fnName: 'mod.getUser', args: ['user-1'], response: { type: ResponseType.return, value: 'Alice' } })
     globalQueue.add({ fnName: 'mod.sendEmail', args: ['user-1'], response: { type: ResponseType.return, value: undefined } })

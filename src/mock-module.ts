@@ -46,8 +46,6 @@ export function createMockModule<Module>(moduleName: string, functionNames: stri
   } as MockModuleInternal<Module>
 
   for (const name of functionNames) {
-    // Passing stub to captureStackTrace removes it and everything below (consume, createError)
-    // from the stack, so the user only sees their code that called the mocked function.
     const stub = (...args: unknown[]) => {
       if (!configuredFns.has(name)) {
         globalQueue.markFailed()

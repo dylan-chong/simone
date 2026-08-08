@@ -4,6 +4,7 @@ import type { MockModuleInstance } from './types.js'
 
 export type { MockedModule, MockModuleInstance, Expectation, ExpectationWithArgs, SyncExpectationWithArgs, AsyncExpectationWithArgs, FunctionKeys } from './types.js'
 export { SimoneError, SimoneAlreadyFailedError } from './errors.js'
+export { match } from './match.js'
 
 export function mockModule<Module>(module: Promise<Module>): MockModuleInstance<Module> {
   throw new SimoneError(

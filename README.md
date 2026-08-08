@@ -78,6 +78,32 @@ Shorthand for `.returns(Promise.reject(error))`. Only available when the functio
 
 Invokes `fn` with the matched args to compute the return value. `fn` must match the original function's signature.
 
+### `match.fn()`
+
+Placeholder for a `withArgs()` slot whose value can't be predicted by the test — for example a callback the code under test builds internally. Skips strict matching for that one slot; every other argument is still matched exactly. The real value passed at call time is forwarded to `.calls(fn)`, so the test must invoke it itself and assert on the resulting effect.
+
+`match.fn()` only works with `.calls()` — using it with `.returns()`, `.throws()`, `.resolves()`, or `.rejects()` throws, since those would let the slot go completely unobserved:
+
+```ts
+import { mockModule, match } from 'simone'
+
+const dbMock = mockModule(import('./database'))
+
+it('invokes the done callback with the created record', () => {
+  dbMock
+    .expects('createDatabase')
+    .withArgs('users-db', match.fn())
+    .calls((name, doneCallback) => {
+      doneCallback(null, { id: 'db-1' })
+    })
+
+  const onDone = vi.fn()
+  createDatabaseWrapper(onDone)
+
+  expect(onDone).toHaveBeenCalledWith(null, { id: 'db-1' })
+})
+```
+
 ### No-arg functions
 
 Functions with no arguments still require `.withArgs()` — call it with no arguments:
@@ -191,6 +217,17 @@ it('creates a div and appends it to the container', () => {
 })
 ```
 
+**Dynamically-generated callbacks** — when the code under test builds a callback internally (e.g. a `done` callback for a database call) and passes it as an argument, there's no way to construct the exact same function reference in a test. Use [`match.fn()`](#matchfn) for that one slot:
+
+```ts
+dbMock
+  .expects('createDatabase')
+  .withArgs('users-db', match.fn())
+  .calls((name, doneCallback) => {
+    doneCallback(null, { id: 'db-1' })
+  })
+```
+
 ## Strict Behavior
 
 - Calling a function with no expectations configured → throws immediately
@@ -219,4 +256,6 @@ it('creates a div and appends it to the container', () => {
 8. Run `npm test` to verify all tests, type checks, and examples pass
 
 Example project test names must describe expected behaviour from the perspective of the example project's domain (e.g. "fails when the database is offline"), not the simone API being used (e.g. "uses .throws() to simulate an error").
+
+The expected-failure test must exercise the feature's actual integration behaviour, not an incidental assertion failure elsewhere in the test. For `match.fn()` specifically, that means proving the real value is genuinely forwarded through the skipped-matching slot to `.calls()` — e.g. passing a real callback that can't work as expected (like `null`) and confirming the failure comes from that real value actually being invoked, not from an unrelated arg mismatch or a wrong `expect()`.
 
