@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [5.1.5] - 2026-08-11
+### Changed
+- Updated `package-lock.json` transitive dev dependencies (nanoid, postcss) — `npm audit` reports 0 vulnerabilities before and after
+
 ## [5.1.4] - 2026-08-11
 ### Added
 - `dist/` is now tracked in git and committed automatically by the pre-commit hook, so packed/published output can never drift out of sync with `src/`
