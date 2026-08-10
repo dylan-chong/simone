@@ -1,13 +1,3 @@
 #!/bin/sh
 
-if git rev-parse HEAD >/dev/null 2>&1; then
-  prev_version=$(git show HEAD:package.json 2>/dev/null | jq -r '.version')
-  new_version=$(git show :package.json 2>/dev/null | jq -r '.version')
-
-  if [ -n "$prev_version" ] && [ "$prev_version" = "$new_version" ]; then
-    echo "package.json version ($new_version) is unchanged from the last commit — bump it before committing."
-    exit 1
-  fi
-fi
-
 npm run build && npm run test

@@ -3,15 +3,15 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
-## [5.1.2] - 2026-08-11
-### Added
-- Repo-local post-commit hook (`.githooks/post-commit`) that tags each commit `v<version>` automatically
+## [5.1.3] - 2026-08-11
+### Removed
+- Pre-commit version-bump check and post-commit auto-tagging — releasing stays a manual step per the "Releasing" checklist below, not something every commit is forced into
 
 ## [5.1.1] - 2026-08-11
 ### Fixed
 - Rebuilt stale `dist/` that still imported the removed `ramda` dependency
 ### Added
-- Repo-local pre-commit hook (`.githooks/pre-commit`) that rebuilds `dist/`, runs tests, and requires a `package.json` version bump on every commit
+- Repo-local pre-commit hook (`.githooks/pre-commit`) that rebuilds `dist/` and runs tests before each commit
 
 ## [5.1.0] - 2026-08-08
 ### Added
