@@ -3,6 +3,12 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [5.1.1] - 2026-08-11
+### Fixed
+- Rebuilt stale `dist/` that still imported the removed `ramda` dependency
+### Added
+- Repo-local pre-commit hook (`.githooks/pre-commit`) that rebuilds `dist/`, runs tests, and requires a `package.json` version bump on every commit
+
 ## [5.1.0] - 2026-08-08
 ### Added
 - `match.fn()` — placeholder for a `withArgs()` slot whose value can't be predicted (e.g. a dynamically-generated callback). Skips strict matching for that slot only; the real value is still forwarded to `.calls()` so the test must invoke it and assert on the effect. Only valid with `.calls()` — throws if paired with `.returns()`/`.throws()`/`.resolves()`/`.rejects()`.
