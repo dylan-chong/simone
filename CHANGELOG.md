@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [5.1.2] - 2026-08-11
+### Added
+- Repo-local post-commit hook (`.githooks/post-commit`) that tags each commit `v<version>` automatically
+
 ## [5.1.1] - 2026-08-11
 ### Fixed
 - Rebuilt stale `dist/` that still imported the removed `ramda` dependency
