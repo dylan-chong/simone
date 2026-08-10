@@ -3,6 +3,10 @@ This repository adheres to semantic versioning and follows the conventions of [k
 
 ## [Unreleased]
 
+## [5.1.4] - 2026-08-11
+### Added
+- `dist/` is now tracked in git and committed automatically by the pre-commit hook, so packed/published output can never drift out of sync with `src/`
+
 ## [5.1.3] - 2026-08-11
 ### Removed
 - Pre-commit version-bump check and post-commit auto-tagging — releasing stays a manual step per the "Releasing" checklist below, not something every commit is forced into
