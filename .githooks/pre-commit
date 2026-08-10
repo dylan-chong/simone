@@ -1,13 +1,3 @@
 #!/bin/sh
 
-if [ ! -f package.json ]; then
-  exit 0
-fi
-
-if jq -e '.scripts.build' package.json >/dev/null 2>&1; then
-  npm run build || exit 1
-fi
-
-if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
-  npm run test
-fi
+npm run build && npm run test
